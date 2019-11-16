@@ -1,1 +1,1 @@
-# Quartz-Chests
+# Quartz Chests

@@ -1,0 +1,25 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern": [
+		"QSQ",
+		"QCQ",
+		"QGQ"
+	],
+	"key": {
+		"Q": {
+			"tag": "forge:gems/quartz"
+		},
+		"S": {
+			"tag": "minecraft:signs"
+		},
+		"C": {
+			"tag": "forge:chests"
+		},
+		"G": {
+			"item": "forge:dusts/glowstone"
+		}
+	},
+	"result": {
+		"item": "quartzchests:chest"
+	}
+}
