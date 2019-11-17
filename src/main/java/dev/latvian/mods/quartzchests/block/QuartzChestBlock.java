@@ -104,7 +104,7 @@ public class QuartzChestBlock extends HorizontalBlock
 
 	@Override
 	@Deprecated
-	public VoxelShape getShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context)
+	public VoxelShape getShape(BlockState state, IBlockReader world, BlockPos pos, ISelectionContext context)
 	{
 		return SHAPE;
 	}
@@ -141,14 +141,14 @@ public class QuartzChestBlock extends HorizontalBlock
 
 	@Override
 	@Deprecated
-	public boolean onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult hit)
+	public boolean onBlockActivated(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult hit)
 	{
-		if (worldIn.isRemote || player.isSpectator())
+		if (world.isRemote || player.isSpectator())
 		{
 			return true;
 		}
 
-		TileEntity entity = worldIn.getTileEntity(pos);
+		TileEntity entity = world.getTileEntity(pos);
 
 		if (entity instanceof QuartzChestEntity)
 		{
@@ -161,7 +161,7 @@ public class QuartzChestBlock extends HorizontalBlock
 			}
 			else if (item.getItem() instanceof DyeItem)
 			{
-				if (hit.getFace().getAxis().isHorizontal() && (hit.getHitVec().y - pos.getY()) > 0.6D)
+				if (hit.getFace() == state.get(HORIZONTAL_FACING) && (hit.getHitVec().y - pos.getY()) > 0.6D)
 				{
 					chest.textColor = 0xFF000000 | ((DyeItem) item.getItem()).getDyeColor().getColorValue();
 				}
@@ -176,21 +176,21 @@ public class QuartzChestBlock extends HorizontalBlock
 			}
 
 			entity.markDirty();
-			worldIn.markAndNotifyBlock(pos, null, state, state, Constants.BlockFlags.DEFAULT_AND_RERENDER);
+			world.markAndNotifyBlock(pos, null, state, state, Constants.BlockFlags.DEFAULT_AND_RERENDER);
 		}
 
 		return true;
 	}
 
 	@Override
-	public void onBlockHarvested(World worldIn, BlockPos pos, BlockState state, PlayerEntity player)
+	public void onBlockHarvested(World world, BlockPos pos, BlockState state, PlayerEntity player)
 	{
-		TileEntity entity = worldIn.getTileEntity(pos);
+		TileEntity entity = world.getTileEntity(pos);
 		if (entity instanceof QuartzChestEntity)
 		{
 			QuartzChestEntity chest = (QuartzChestEntity) entity;
 
-			if (!worldIn.isRemote && player.isCreative())
+			if (!world.isRemote && player.isCreative())
 			{
 				CompoundNBT data = new CompoundNBT();
 				chest.writeData(data);
@@ -199,14 +199,14 @@ public class QuartzChestBlock extends HorizontalBlock
 				{
 					ItemStack stack = new ItemStack(this);
 					stack.setTagInfo("BlockEntityTag", data);
-					ItemEntity itemEntity = new ItemEntity(worldIn, pos.getX(), pos.getY(), pos.getZ(), stack);
+					ItemEntity itemEntity = new ItemEntity(world, pos.getX(), pos.getY(), pos.getZ(), stack);
 					itemEntity.setDefaultPickupDelay();
-					worldIn.addEntity(itemEntity);
+					world.addEntity(itemEntity);
 				}
 			}
 		}
 
-		super.onBlockHarvested(worldIn, pos, state, player);
+		super.onBlockHarvested(world, pos, state, player);
 	}
 
 	@Override

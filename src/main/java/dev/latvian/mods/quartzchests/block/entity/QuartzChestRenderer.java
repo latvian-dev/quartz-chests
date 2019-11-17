@@ -39,7 +39,7 @@ public class QuartzChestRenderer extends TileEntityRenderer<QuartzChestEntity>
 		//getFontRenderer().setUnicodeFlag(true);
 		String label = chest.label;
 		int sw1 = getFontRenderer().getStringWidth(label);
-		float f1 = 1F / (float) Math.max((sw1 + 20), 64);
+		float f1 = 1F / (float) Math.max((sw1 + 30), 64);
 		GlStateManager.scalef(f1, f1, 1F);
 		getFontRenderer().drawString(label, -sw1 / 2F, 0, 0xFF000000 | chest.textColor);
 		//getFontRenderer().setUnicodeFlag(flag);
