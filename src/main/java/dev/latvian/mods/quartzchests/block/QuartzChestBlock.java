@@ -89,7 +89,7 @@ public class QuartzChestBlock extends HorizontalBlock
 	@Override
 	public BlockRenderLayer getRenderLayer()
 	{
-		return BlockRenderLayer.CUTOUT;
+		return BlockRenderLayer.CUTOUT_MIPPED;
 	}
 
 	@Override

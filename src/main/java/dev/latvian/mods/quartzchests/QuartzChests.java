@@ -5,13 +5,19 @@ import dev.latvian.mods.quartzchests.block.QuartzChestsBlocks;
 import dev.latvian.mods.quartzchests.block.entity.QuartzChestEntity;
 import dev.latvian.mods.quartzchests.block.entity.QuartzChestRenderer;
 import dev.latvian.mods.quartzchests.item.QuartzChestItem;
+import dev.latvian.mods.quartzchests.item.QuartzChestsItems;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.material.MaterialColor;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
+import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IEnviromentBlockReader;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
@@ -34,6 +40,35 @@ public class QuartzChests
 	private void clientSetup(FMLClientSetupEvent event)
 	{
 		ClientRegistry.bindTileEntitySpecialRenderer(QuartzChestEntity.class, new QuartzChestRenderer());
+		event.getMinecraftSupplier().get().getBlockColors().register(this::chestBlockColor, QuartzChestsBlocks.CHEST);
+		event.getMinecraftSupplier().get().getItemColors().register(this::chestItemColor, QuartzChestsItems.CHEST);
+	}
+
+	private int chestBlockColor(BlockState state, IEnviromentBlockReader context, BlockPos pos, int index)
+	{
+		if (index == 1)
+		{
+			return 0xFF4A4040;
+		}
+
+		TileEntity entity = context.getTileEntity(pos);
+
+		if (entity instanceof QuartzChestEntity)
+		{
+			return ((QuartzChestEntity) entity).color;
+		}
+
+		return 0xFFFFFFFF;
+	}
+
+	private int chestItemColor(ItemStack stack, int index)
+	{
+		if (index == 1)
+		{
+			return 0xFF4A4040;
+		}
+
+		return stack.hasTag() && stack.getTag().contains("color") ? stack.getTag().getInt("color") : 0xFFFFFFFF;
 	}
 
 	private void registerBlocks(RegistryEvent.Register<Block> event)

@@ -16,7 +16,7 @@
 			"tag": "forge:chests"
 		},
 		"G": {
-			"item": "forge:dusts/glowstone"
+			"tag": "forge:dusts/glowstone"
 		}
 	},
 	"result": {
