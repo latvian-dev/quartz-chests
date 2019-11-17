@@ -3,23 +3,13 @@
 	"pattern": [
 		"QSQ",
 		"QCQ",
-		"QGQ"
+		"QFQ"
 	],
 	"key": {
-		"Q": {
-			"tag": "forge:gems/quartz"
-		},
-		"S": {
-			"tag": "minecraft:signs"
-		},
-		"C": {
-			"tag": "forge:chests"
-		},
-		"G": {
-			"tag": "forge:dusts/glowstone"
-		}
+		"Q": {"tag": "forge:gems/quartz"},
+		"S": {"tag": "minecraft:signs"},
+		"C": {"tag": "forge:chests"},
+		"F": {"item": "minecraft:item_frame"}
 	},
-	"result": {
-		"item": "quartzchests:chest"
-	}
+	"result": {"item": "quartzchests:chest"}
 }

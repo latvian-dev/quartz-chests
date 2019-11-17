@@ -14,6 +14,7 @@ import net.minecraft.block.material.MaterialColor;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.math.BlockPos;
@@ -46,29 +47,36 @@ public class QuartzChests
 
 	private int chestBlockColor(BlockState state, IEnviromentBlockReader context, BlockPos pos, int index)
 	{
-		if (index == 1)
-		{
-			return 0xFF4A4040;
-		}
-
 		TileEntity entity = context.getTileEntity(pos);
 
 		if (entity instanceof QuartzChestEntity)
 		{
-			return ((QuartzChestEntity) entity).color;
+			return 0xFF000000 | (index == 1 ? ((QuartzChestEntity) entity).borderColor : ((QuartzChestEntity) entity).color);
 		}
 
-		return 0xFFFFFFFF;
+		return index == 1 ? 0xFF4A4040 : 0xFFFFFFFF;
 	}
 
 	private int chestItemColor(ItemStack stack, int index)
 	{
-		if (index == 1)
+		CompoundNBT data = stack.getChildTag("BlockEntityTag");
+
+		if (data != null)
 		{
-			return 0xFF4A4040;
+			if (index == 1)
+			{
+				if (data.contains("border_color"))
+				{
+					return 0xFF000000 | data.getInt("border_color");
+				}
+			}
+			else if (data.contains("color"))
+			{
+				return 0xFF000000 | data.getInt("color");
+			}
 		}
 
-		return stack.hasTag() && stack.getTag().contains("color") ? stack.getTag().getInt("color") : 0xFFFFFFFF;
+		return index == 1 ? 0xFF4A4040 : 0xFFFFFFFF;
 	}
 
 	private void registerBlocks(RegistryEvent.Register<Block> event)
@@ -81,7 +89,7 @@ public class QuartzChests
 
 	private void registerItems(RegistryEvent.Register<Item> event)
 	{
-		Item.Properties properties = new Item.Properties().group(ItemGroup.DECORATIONS).maxStackSize(1);
+		Item.Properties properties = new Item.Properties().group(ItemGroup.DECORATIONS).maxStackSize(16);
 		event.getRegistry().register(new QuartzChestItem(QuartzChestsBlocks.CHEST, properties).setRegistryName("chest"));
 	}
 
