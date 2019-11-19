@@ -1,6 +1,7 @@
 package dev.latvian.mods.quartzchests.block;
 
 import dev.latvian.mods.quartzchests.block.entity.QuartzChestEntity;
+import dev.latvian.mods.quartzchests.gui.QuartzChestContainer;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
@@ -8,13 +9,19 @@ import net.minecraft.block.HorizontalBlock;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.fluid.IFluidState;
+import net.minecraft.inventory.InventoryHelper;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.DyeItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.NameTagItem;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.pathfinding.PathType;
 import net.minecraft.state.StateContainer;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tileentity.TileEntity;
@@ -38,6 +45,7 @@ import net.minecraft.world.storage.loot.LootParameters;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.fml.network.NetworkHooks;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -117,26 +125,16 @@ public class QuartzChestBlock extends HorizontalBlock
 
 	@Override
 	@Deprecated
-	public BlockRenderType getRenderType(BlockState state)
+	public boolean hasCustomBreakingProgress(BlockState state)
 	{
-		return BlockRenderType.MODEL;
+		return true;
 	}
 
 	@Override
 	@Deprecated
-	public ItemStack getItem(IBlockReader world, BlockPos pos, BlockState state)
+	public BlockRenderType getRenderType(BlockState state)
 	{
-		ItemStack stack = new ItemStack(this);
-
-		TileEntity entity = world.getTileEntity(pos);
-
-		if (entity instanceof QuartzChestEntity)
-		{
-			QuartzChestEntity chest = (QuartzChestEntity) entity;
-			//stack.setTagInfo("", new IntNBT(chest.));
-		}
-
-		return stack;
+		return BlockRenderType.ENTITYBLOCK_ANIMATED;
 	}
 
 	@Override
@@ -158,25 +156,40 @@ public class QuartzChestBlock extends HorizontalBlock
 			if (item.getItem() instanceof NameTagItem && item.hasDisplayName())
 			{
 				chest.label = item.getDisplayName().getString();
+				chest.markDirty();
+				world.markAndNotifyBlock(pos, null, state, state, Constants.BlockFlags.DEFAULT_AND_RERENDER);
+				return true;
 			}
 			else if (item.getItem() instanceof DyeItem)
 			{
-				if (hit.getFace() == state.get(HORIZONTAL_FACING) && (hit.getHitVec().y - pos.getY()) > 0.6D)
+				if (!chest.label.isEmpty() && hit.getFace() == state.get(HORIZONTAL_FACING) && (hit.getHitVec().y - pos.getY()) > 0.6D)
 				{
 					chest.textColor = 0xFF000000 | ((DyeItem) item.getItem()).getDyeColor().getColorValue();
 				}
 				else
 				{
-					chest.color = 0xFF000000 | ((DyeItem) item.getItem()).getDyeColor().getColorValue();
+					chest.chestColor = 0xFF000000 | ((DyeItem) item.getItem()).getDyeColor().getColorValue();
 				}
-			}
-			else
-			{
-				chest.icon = item;
+
+				chest.markDirty();
+				world.markAndNotifyBlock(pos, null, state, state, Constants.BlockFlags.DEFAULT_AND_RERENDER);
+				return true;
 			}
 
-			entity.markDirty();
-			world.markAndNotifyBlock(pos, null, state, state, Constants.BlockFlags.DEFAULT_AND_RERENDER);
+			NetworkHooks.openGui((ServerPlayerEntity) player, new INamedContainerProvider()
+			{
+				@Override
+				public ITextComponent getDisplayName()
+				{
+					return chest.getDisplayName();
+				}
+
+				@Override
+				public Container createMenu(int id, PlayerInventory playerInventory, PlayerEntity player)
+				{
+					return new QuartzChestContainer(id, playerInventory, chest);
+				}
+			}, pos);
 		}
 
 		return true;
@@ -186,6 +199,7 @@ public class QuartzChestBlock extends HorizontalBlock
 	public void onBlockHarvested(World world, BlockPos pos, BlockState state, PlayerEntity player)
 	{
 		TileEntity entity = world.getTileEntity(pos);
+
 		if (entity instanceof QuartzChestEntity)
 		{
 			QuartzChestEntity chest = (QuartzChestEntity) entity;
@@ -211,6 +225,31 @@ public class QuartzChestBlock extends HorizontalBlock
 
 	@Override
 	@Deprecated
+	public void onReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean isMoving)
+	{
+		if (state.getBlock() != newState.getBlock())
+		{
+			TileEntity entity = world.getTileEntity(pos);
+
+			if (entity instanceof QuartzChestEntity)
+			{
+				QuartzChestEntity chest = (QuartzChestEntity) entity;
+
+				if (!chest.keepInventory)
+				{
+					for (int i = 0; i < chest.inventory.getSlots(); i++)
+					{
+						InventoryHelper.spawnItemStack(world, pos.getX(), pos.getY(), pos.getZ(), chest.inventory.getStackInSlot(i));
+					}
+				}
+			}
+
+			super.onReplaced(state, world, pos, newState, isMoving);
+		}
+	}
+
+	@Override
+	@Deprecated
 	public List<ItemStack> getDrops(BlockState state, LootContext.Builder builder)
 	{
 		TileEntity entity = builder.get(LootParameters.BLOCK_ENTITY);
@@ -219,15 +258,25 @@ public class QuartzChestBlock extends HorizontalBlock
 		{
 			QuartzChestEntity chest = (QuartzChestEntity) entity;
 
-			builder = builder.withDynamicDrop(CONTENTS, (context, callback) -> {
-				for (int i = 0; i < chest.inventory.getSlots(); i++)
-				{
-					callback.accept(chest.inventory.getStackInSlot(i));
-				}
-			});
+			if (chest.keepInventory)
+			{
+				builder = builder.withDynamicDrop(CONTENTS, (context, callback) -> {
+					for (int i = 0; i < chest.inventory.getSlots(); i++)
+					{
+						callback.accept(chest.inventory.getStackInSlot(i));
+					}
+				});
+			}
 		}
 
 		return super.getDrops(state, builder);
+	}
+
+	@Override
+	@Deprecated
+	public boolean allowsMovement(BlockState state, IBlockReader worldIn, BlockPos pos, PathType type)
+	{
+		return false;
 	}
 
 	@Override
@@ -245,7 +294,8 @@ public class QuartzChestBlock extends HorizontalBlock
 		dummy.readData(data == null ? new CompoundNBT() : data);
 
 		tooltip.add(new StringTextComponent("").appendSibling(new TranslationTextComponent("block.quartzchests.chest.label").applyTextStyle(TextFormatting.GRAY).appendText(": ")).appendSibling(new StringTextComponent(dummy.label).applyTextStyle(TextFormatting.YELLOW)));
-		tooltip.add(new StringTextComponent("").appendSibling(new TranslationTextComponent("block.quartzchests.chest.color").applyTextStyle(TextFormatting.GRAY).appendText(": ")).appendSibling(new StringTextComponent(String.format("#%06X", dummy.color)).applyTextStyle(TextFormatting.YELLOW)));
+		tooltip.add(new StringTextComponent("").appendSibling(new TranslationTextComponent("block.quartzchests.chest.chest_color").applyTextStyle(TextFormatting.GRAY).appendText(": ")).appendSibling(new StringTextComponent(String.format("#%06X", dummy.chestColor)).applyTextStyle(TextFormatting.YELLOW)));
+		tooltip.add(new StringTextComponent("").appendSibling(new TranslationTextComponent("block.quartzchests.chest.border_color").applyTextStyle(TextFormatting.GRAY).appendText(": ")).appendSibling(new StringTextComponent(String.format("#%06X", dummy.borderColor)).applyTextStyle(TextFormatting.YELLOW)));
 		tooltip.add(new StringTextComponent("").appendSibling(new TranslationTextComponent("block.quartzchests.chest.text_color").applyTextStyle(TextFormatting.GRAY).appendText(": ")).appendSibling(new StringTextComponent(String.format("#%06X", dummy.textColor)).applyTextStyle(TextFormatting.YELLOW)));
 		tooltip.add(new StringTextComponent("").appendSibling(new TranslationTextComponent("block.quartzchests.chest.icon").applyTextStyle(TextFormatting.GRAY).appendText(": ")).appendSibling(dummy.icon.getDisplayName().deepCopy().applyTextStyle(TextFormatting.YELLOW)));
 	}

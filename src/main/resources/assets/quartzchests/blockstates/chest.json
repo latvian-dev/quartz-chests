@@ -1,8 +1,5 @@
 {
 	"variants": {
-		"facing=north": {"model": "quartzchests:block/chest"},
-		"facing=south": {"model": "quartzchests:block/chest", "y": 180},
-		"facing=west": {"model": "quartzchests:block/chest", "y": 270},
-		"facing=east": {"model": "quartzchests:block/chest", "y": 90}
+		"": {"model": "quartzchests:block/chest"}
 	}
 }

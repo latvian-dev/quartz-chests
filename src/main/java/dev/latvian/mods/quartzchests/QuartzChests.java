@@ -3,27 +3,26 @@ package dev.latvian.mods.quartzchests;
 import dev.latvian.mods.quartzchests.block.QuartzChestBlock;
 import dev.latvian.mods.quartzchests.block.QuartzChestsBlocks;
 import dev.latvian.mods.quartzchests.block.entity.QuartzChestEntity;
-import dev.latvian.mods.quartzchests.block.entity.QuartzChestRenderer;
-import dev.latvian.mods.quartzchests.item.QuartzChestItem;
-import dev.latvian.mods.quartzchests.item.QuartzChestsItems;
+import dev.latvian.mods.quartzchests.client.QuartzChestItemRenderer;
+import dev.latvian.mods.quartzchests.client.QuartzChestsClient;
+import dev.latvian.mods.quartzchests.gui.QuartzChestContainer;
+import dev.latvian.mods.quartzchests.net.QuartzChestsNet;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.material.MaterialColor;
+import net.minecraft.inventory.container.ContainerType;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IEnviromentBlockReader;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.fml.client.registry.ClientRegistry;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.network.IContainerFactory;
 
 @Mod(QuartzChests.MOD_ID)
 public class QuartzChests
@@ -32,51 +31,19 @@ public class QuartzChests
 
 	public QuartzChests()
 	{
-		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::clientSetup);
+		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::init);
 		FMLJavaModLoadingContext.get().getModEventBus().addGenericListener(Block.class, this::registerBlocks);
 		FMLJavaModLoadingContext.get().getModEventBus().addGenericListener(Item.class, this::registerItems);
 		FMLJavaModLoadingContext.get().getModEventBus().addGenericListener(TileEntityType.class, this::registerBlockEntities);
+		FMLJavaModLoadingContext.get().getModEventBus().addGenericListener(ContainerType.class, this::registerContainers);
+
+		//noinspection Convert2MethodRef
+		DistExecutor.callWhenOn(Dist.CLIENT, () -> () -> new QuartzChestsClient());
 	}
 
-	private void clientSetup(FMLClientSetupEvent event)
+	private void init(FMLCommonSetupEvent event)
 	{
-		ClientRegistry.bindTileEntitySpecialRenderer(QuartzChestEntity.class, new QuartzChestRenderer());
-		event.getMinecraftSupplier().get().getBlockColors().register(this::chestBlockColor, QuartzChestsBlocks.CHEST);
-		event.getMinecraftSupplier().get().getItemColors().register(this::chestItemColor, QuartzChestsItems.CHEST);
-	}
-
-	private int chestBlockColor(BlockState state, IEnviromentBlockReader context, BlockPos pos, int index)
-	{
-		TileEntity entity = context.getTileEntity(pos);
-
-		if (entity instanceof QuartzChestEntity)
-		{
-			return 0xFF000000 | (index == 1 ? ((QuartzChestEntity) entity).borderColor : ((QuartzChestEntity) entity).color);
-		}
-
-		return index == 1 ? 0xFF4A4040 : 0xFFFFFFFF;
-	}
-
-	private int chestItemColor(ItemStack stack, int index)
-	{
-		CompoundNBT data = stack.getChildTag("BlockEntityTag");
-
-		if (data != null)
-		{
-			if (index == 1)
-			{
-				if (data.contains("border_color"))
-				{
-					return 0xFF000000 | data.getInt("border_color");
-				}
-			}
-			else if (data.contains("color"))
-			{
-				return 0xFF000000 | data.getInt("color");
-			}
-		}
-
-		return index == 1 ? 0xFF4A4040 : 0xFFFFFFFF;
+		QuartzChestsNet.init();
 	}
 
 	private void registerBlocks(RegistryEvent.Register<Block> event)
@@ -90,11 +57,18 @@ public class QuartzChests
 	private void registerItems(RegistryEvent.Register<Item> event)
 	{
 		Item.Properties properties = new Item.Properties().group(ItemGroup.DECORATIONS).maxStackSize(16);
-		event.getRegistry().register(new QuartzChestItem(QuartzChestsBlocks.CHEST, properties).setRegistryName("chest"));
+		//noinspection Convert2MethodRef
+		properties.setTEISR(() -> () -> new QuartzChestItemRenderer());
+		event.getRegistry().register(new BlockItem(QuartzChestsBlocks.CHEST, properties).setRegistryName("chest"));
 	}
 
 	private void registerBlockEntities(RegistryEvent.Register<TileEntityType<?>> event)
 	{
 		event.getRegistry().register(TileEntityType.Builder.create(QuartzChestEntity::new, QuartzChestsBlocks.CHEST).build(null).setRegistryName("chest"));
+	}
+
+	private void registerContainers(RegistryEvent.Register<ContainerType<?>> event)
+	{
+		event.getRegistry().register(new ContainerType<>((IContainerFactory<QuartzChestContainer>) QuartzChestContainer::new).setRegistryName("chest"));
 	}
 }

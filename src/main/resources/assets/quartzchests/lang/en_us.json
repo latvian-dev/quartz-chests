@@ -2,7 +2,8 @@
 	"block.quartzchests.chest": "Quartz Chest",
 	"block.quartzchests.chest.label": "Label",
 	"block.quartzchests.chest.label.unnamed": "Unnamed",
-	"block.quartzchests.chest.color": "Color",
+	"block.quartzchests.chest.chest_color": "Chest Color",
+	"block.quartzchests.chest.border_color": "Border Color",
 	"block.quartzchests.chest.text_color": "Text Color",
 	"block.quartzchests.chest.icon": "Icon"
 }

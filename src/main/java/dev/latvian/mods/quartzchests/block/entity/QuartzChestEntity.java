@@ -8,6 +8,8 @@ import net.minecraft.network.play.server.SUpdateTileEntityPacket;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.INameable;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvents;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -25,23 +27,28 @@ import javax.annotation.Nullable;
  */
 public class QuartzChestEntity extends TileEntity implements INameable
 {
-	public static final int DEFAULT_COLOR = 0xFFFFFF;
+	public static final int DEFAULT_CHEST_COLOR = 0xEAD8C5;
 	public static final int DEFAULT_BORDER_COLOR = 0x4A4040;
-	public static final int DEFAULT_TEXT_COLOR = 0x000000;
+	public static final int DEFAULT_TEXT_COLOR = 0x222222;
 
 	public String label;
-	public int color;
+	public int chestColor;
 	public int borderColor;
 	public int textColor;
 	public ItemStack icon;
 	public ItemStackHandler inventory;
 	private final LazyOptional<IItemHandler> inventoryCap;
+	public int openContainers;
+	public boolean textGlow;
+	public boolean textBold;
+	public boolean textItalic;
+	public boolean keepInventory;
 
 	public QuartzChestEntity()
 	{
 		super(QuartzChestsBlockEntities.CHEST);
 		label = "";
-		color = DEFAULT_COLOR;
+		chestColor = DEFAULT_CHEST_COLOR;
 		borderColor = DEFAULT_BORDER_COLOR;
 		textColor = DEFAULT_TEXT_COLOR;
 		icon = ItemStack.EMPTY;
@@ -56,18 +63,23 @@ public class QuartzChestEntity extends TileEntity implements INameable
 		};
 
 		inventoryCap = LazyOptional.of(() -> inventory);
+		openContainers = 0;
+		textGlow = false;
+		textBold = false;
+		textItalic = false;
+		keepInventory = false;
 	}
 
-	public void writeData(CompoundNBT nbt)
+	public void writeVisualData(CompoundNBT nbt)
 	{
 		if (!label.isEmpty())
 		{
 			nbt.putString("label", label);
 		}
 
-		if (color != DEFAULT_COLOR)
+		if (chestColor != DEFAULT_CHEST_COLOR)
 		{
-			nbt.putInt("color", color);
+			nbt.putInt("chest_color", chestColor);
 		}
 
 		if (borderColor != DEFAULT_BORDER_COLOR)
@@ -85,6 +97,31 @@ public class QuartzChestEntity extends TileEntity implements INameable
 			nbt.put("icon", icon.write(new CompoundNBT()));
 		}
 
+		if (textGlow)
+		{
+			nbt.putBoolean("text_glow", true);
+		}
+
+		if (textBold)
+		{
+			nbt.putBoolean("text_bold", true);
+		}
+
+		if (textItalic)
+		{
+			nbt.putBoolean("text_italic", true);
+		}
+
+		if (keepInventory)
+		{
+			nbt.putBoolean("keep_inventory", true);
+		}
+	}
+
+	public void writeData(CompoundNBT nbt)
+	{
+		writeVisualData(nbt);
+
 		ListNBT items = inventory.serializeNBT().getList("Items", Constants.NBT.TAG_COMPOUND);
 
 		if (!items.isEmpty())
@@ -93,27 +130,27 @@ public class QuartzChestEntity extends TileEntity implements INameable
 		}
 	}
 
-	public void readData(CompoundNBT nbt)
+	public void readVisualData(CompoundNBT nbt)
 	{
 		label = nbt.getString("label");
-		color = nbt.contains("color") ? nbt.getInt("color") : DEFAULT_COLOR;
+		chestColor = nbt.contains("chest_color") ? nbt.getInt("chest_color") : DEFAULT_CHEST_COLOR;
 		borderColor = nbt.contains("border_color") ? nbt.getInt("border_color") : DEFAULT_BORDER_COLOR;
 		textColor = nbt.contains("text_color") ? nbt.getInt("text_color") : DEFAULT_TEXT_COLOR;
 		icon = nbt.contains("icon") ? ItemStack.read(nbt.getCompound("icon")) : ItemStack.EMPTY;
+		textGlow = nbt.getBoolean("text_glow");
+		textBold = nbt.getBoolean("text_bold");
+		textItalic = nbt.getBoolean("text_italic");
+		keepInventory = nbt.getBoolean("keep_inventory");
+	}
 
-
+	public void readData(CompoundNBT nbt)
+	{
+		readVisualData(nbt);
 		ListNBT items = nbt.getList("items", Constants.NBT.TAG_COMPOUND);
-
-		if (items.isEmpty())
-		{
-			inventory.setSize(54);
-		}
-		else
-		{
-			CompoundNBT invNBT = new CompoundNBT();
-			invNBT.put("Items", items);
-			inventory.deserializeNBT(invNBT);
-		}
+		inventory.setSize(54);
+		CompoundNBT invNBT = new CompoundNBT();
+		invNBT.put("Items", items);
+		inventory.deserializeNBT(invNBT);
 	}
 
 	@Override
@@ -130,23 +167,24 @@ public class QuartzChestEntity extends TileEntity implements INameable
 		readData(nbt);
 	}
 
+	@Override
 	@Nullable
 	public SUpdateTileEntityPacket getUpdatePacket()
 	{
 		CompoundNBT nbt = new CompoundNBT();
-		writeData(nbt);
+		writeVisualData(nbt);
+		if (openContainers > 0)
+		{
+			nbt.putShort("open_containers", (short) openContainers);
+		}
 		return new SUpdateTileEntityPacket(pos, 0, nbt);
 	}
 
 	@Override
 	public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt)
 	{
-		readData(pkt.getNbtCompound());
-
-		if (world != null)
-		{
-			world.markAndNotifyBlock(pos, null, getBlockState(), getBlockState(), Constants.BlockFlags.DEFAULT_AND_RERENDER);
-		}
+		readVisualData(pkt.getNbtCompound());
+		openContainers = pkt.getNbtCompound().getShort("open_containers");
 	}
 
 	@Override
@@ -189,5 +227,43 @@ public class QuartzChestEntity extends TileEntity implements INameable
 		}
 
 		return super.getCapability(cap, side);
+	}
+
+	@Override
+	public void markDirty()
+	{
+		if (world != null)
+		{
+			updateContainingBlockInfo();
+			world.markChunkDirty(pos, this);
+		}
+	}
+
+	public void containerOpened()
+	{
+		openContainers++;
+
+		if (!world.isRemote)
+		{
+			world.playSound(null, pos, SoundEvents.BLOCK_CHEST_OPEN, SoundCategory.BLOCKS, 0.5F, world.rand.nextFloat() * 0.1F + 0.9F);
+		}
+
+		world.markAndNotifyBlock(pos, null, getBlockState(), getBlockState(), Constants.BlockFlags.DEFAULT);
+	}
+
+	public void containerClosed()
+	{
+		openContainers--;
+
+		if (openContainers < 0)
+		{
+			openContainers = 0;
+		}
+		else if (!world.isRemote)
+		{
+			world.playSound(null, pos, SoundEvents.BLOCK_CHEST_CLOSE, SoundCategory.BLOCKS, 0.5F, world.rand.nextFloat() * 0.1F + 0.9F);
+		}
+
+		world.markAndNotifyBlock(pos, null, getBlockState(), getBlockState(), Constants.BlockFlags.DEFAULT);
 	}
 }

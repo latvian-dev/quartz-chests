@@ -13,13 +13,18 @@
 							"source": "block_entity",
 							"ops": [
 								{
+									"source": "items",
+									"target": "BlockEntityTag.items",
+									"op": "replace"
+								},
+								{
 									"source": "label",
 									"target": "BlockEntityTag.label",
 									"op": "replace"
 								},
 								{
-									"source": "color",
-									"target": "BlockEntityTag.color",
+									"source": "chest_color",
+									"target": "BlockEntityTag.chest_color",
 									"op": "replace"
 								},
 								{
@@ -38,8 +43,23 @@
 									"op": "replace"
 								},
 								{
-									"source": "glowing_text",
-									"target": "BlockEntityTag.glowing_text",
+									"source": "text_glow",
+									"target": "BlockEntityTag.text_glow",
+									"op": "replace"
+								},
+								{
+									"source": "text_bold",
+									"target": "BlockEntityTag.text_bold",
+									"op": "replace"
+								},
+								{
+									"source": "text_italic",
+									"target": "BlockEntityTag.text_italic",
+									"op": "replace"
+								},
+								{
+									"source": "keep_inventory",
+									"target": "BlockEntityTag.keep_inventory",
 									"op": "replace"
 								}
 							]
