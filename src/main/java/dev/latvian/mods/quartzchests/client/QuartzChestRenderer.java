@@ -3,6 +3,7 @@ package dev.latvian.mods.quartzchests.client;
 import com.mojang.blaze3d.platform.GlStateManager;
 import dev.latvian.mods.quartzchests.QuartzChests;
 import dev.latvian.mods.quartzchests.block.QuartzChestsBlocks;
+import dev.latvian.mods.quartzchests.block.entity.ColorType;
 import dev.latvian.mods.quartzchests.block.entity.QuartzChestEntity;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -16,6 +17,7 @@ import net.minecraft.client.renderer.model.Model;
 import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TextFormatting;
 
 /**
@@ -93,9 +95,12 @@ public class QuartzChestRenderer extends TileEntityRenderer<QuartzChestEntity>
 
 		GlStateManager.color4f(1F, 1F, 1F, 1F);
 
-		if (chest.hasWorld() && chest.openContainers > 0)
+		if (chest.hasWorld())
 		{
-			baseModel.top.rotateAngleX = bordersModel.top.rotateAngleX = -1.3F;
+			double angle = MathHelper.lerp(partialTicks, chest.prevLidAngle, chest.lidAngle);
+			angle = 1D - angle;
+			angle = 1D - angle * angle * angle;
+			baseModel.top.rotateAngleX = bordersModel.top.rotateAngleX = -(float) (angle * Math.PI / 2D);
 		}
 		else
 		{
@@ -103,20 +108,20 @@ public class QuartzChestRenderer extends TileEntityRenderer<QuartzChestEntity>
 		}
 
 		bindTexture(destroyStage >= 0 ? DESTROY_STAGES[destroyStage] : TEXTURE_BASE);
-		int cc = chest.chestColor;
+		int cc = chest.colors[ColorType.CHEST.index];
 		GlStateManager.color4f(((cc >> 16) & 255) / 255F, ((cc >> 8) & 255) / 255F, (cc & 255) / 255F, 1F);
 		baseModel.renderAll();
 
 		if (destroyStage < 0)
 		{
 			bindTexture(TEXTURE_BORDERS);
-			int bc = chest.borderColor;
+			int bc = chest.colors[ColorType.BORDER.index];
 			GlStateManager.color4f(((bc >> 16) & 255) / 255F, ((bc >> 8) & 255) / 255F, (bc & 255) / 255F, 1F);
 			bordersModel.renderAll();
 
 			GlStateManager.color4f(1F, 1F, 1F, 1F);
 
-			if (!chest.hasWorld() || chest.openContainers <= 0)
+			if (!chest.hasWorld() || baseModel.top.rotateAngleX == 0F)
 			{
 				if (chest.textGlow && chest.hasWorld())
 				{
@@ -146,7 +151,7 @@ public class QuartzChestRenderer extends TileEntityRenderer<QuartzChestEntity>
 				int sw1 = getFontRenderer().getStringWidth(label);
 				float f1 = 1F / (float) Math.max((sw1 + 30), 64);
 				GlStateManager.scalef(f1, f1, 1F);
-				getFontRenderer().drawString(label, -sw1 / 2F, 0, 0xFF000000 | chest.textColor);
+				getFontRenderer().drawString(label, -sw1 / 2F, 0, 0xFF000000 | chest.colors[ColorType.TEXT.index]);
 				GlStateManager.popMatrix();
 
 				if (chest.textGlow && chest.hasWorld())

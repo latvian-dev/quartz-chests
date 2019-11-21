@@ -5,7 +5,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 import java.util.function.Supplier;
@@ -45,7 +44,6 @@ public class SetIconMessage
 			{
 				((QuartzChestEntity) entity).icon = icon;
 				entity.markDirty();
-				entity.getWorld().markAndNotifyBlock(pos, null, entity.getBlockState(), entity.getBlockState(), Constants.BlockFlags.DEFAULT);
 			}
 		});
 	}

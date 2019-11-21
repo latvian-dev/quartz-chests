@@ -1,0 +1,8 @@
+{
+	"type": "minecraft:crafting_shapeless",
+	"ingredients": [
+		{"item": "quartzchests:upgrade"},
+		{"tag": "forge:feathers"}
+	],
+	"result": {"item": "quartzchests:italic_text_upgrade"}
+}

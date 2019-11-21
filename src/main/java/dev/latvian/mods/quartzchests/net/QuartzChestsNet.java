@@ -20,9 +20,7 @@ public class QuartzChestsNet
 				.simpleChannel();
 
 		MAIN.registerMessage(1, SetLabelMessage.class, SetLabelMessage::write, SetLabelMessage::new, SetLabelMessage::handle);
-		MAIN.registerMessage(2, SetChestColorMessage.class, SetChestColorMessage::write, SetChestColorMessage::new, SetChestColorMessage::handle);
-		MAIN.registerMessage(3, SetBorderColorMessage.class, SetBorderColorMessage::write, SetBorderColorMessage::new, SetBorderColorMessage::handle);
-		MAIN.registerMessage(4, SetTextColorMessage.class, SetTextColorMessage::write, SetTextColorMessage::new, SetTextColorMessage::handle);
-		MAIN.registerMessage(5, SetIconMessage.class, SetIconMessage::write, SetIconMessage::new, SetIconMessage::handle);
+		MAIN.registerMessage(2, SetIconMessage.class, SetIconMessage::write, SetIconMessage::new, SetIconMessage::handle);
+		MAIN.registerMessage(3, SetColorMessage.class, SetColorMessage::write, SetColorMessage::new, SetColorMessage::handle);
 	}
 }

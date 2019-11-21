@@ -1,7 +1,9 @@
 package dev.latvian.mods.quartzchests.block;
 
+import dev.latvian.mods.quartzchests.block.entity.ColorType;
 import dev.latvian.mods.quartzchests.block.entity.QuartzChestEntity;
 import dev.latvian.mods.quartzchests.gui.QuartzChestContainer;
+import dev.latvian.mods.quartzchests.item.QuartzChestsItems;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
@@ -18,6 +20,7 @@ import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.DyeItem;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.NameTagItem;
 import net.minecraft.nbt.CompoundNBT;
@@ -151,28 +154,73 @@ public class QuartzChestBlock extends HorizontalBlock
 		if (entity instanceof QuartzChestEntity)
 		{
 			QuartzChestEntity chest = (QuartzChestEntity) entity;
-			ItemStack item = player.getHeldItem(hand);
+			ItemStack stack = player.getHeldItem(hand);
+			Item item = stack.getItem();
 
-			if (item.getItem() instanceof NameTagItem && item.hasDisplayName())
+			if (item instanceof NameTagItem && stack.hasDisplayName())
 			{
-				chest.label = item.getDisplayName().getString();
+				chest.label = stack.getDisplayName().getString();
 				chest.markDirty();
 				world.markAndNotifyBlock(pos, null, state, state, Constants.BlockFlags.DEFAULT_AND_RERENDER);
 				return true;
 			}
-			else if (item.getItem() instanceof DyeItem)
+			else if (item instanceof DyeItem)
 			{
 				if (!chest.label.isEmpty() && hit.getFace() == state.get(HORIZONTAL_FACING) && (hit.getHitVec().y - pos.getY()) > 0.6D)
 				{
-					chest.textColor = 0xFF000000 | ((DyeItem) item.getItem()).getDyeColor().getColorValue();
+					chest.colors[ColorType.TEXT.index] = 0xFF000000 | ((DyeItem) item).getDyeColor().getColorValue();
 				}
 				else
 				{
-					chest.chestColor = 0xFF000000 | ((DyeItem) item.getItem()).getDyeColor().getColorValue();
+					chest.colors[ColorType.CHEST.index] = 0xFF000000 | ((DyeItem) item).getDyeColor().getColorValue();
 				}
 
 				chest.markDirty();
 				world.markAndNotifyBlock(pos, null, state, state, Constants.BlockFlags.DEFAULT_AND_RERENDER);
+				return true;
+			}
+			else if (item == QuartzChestsItems.KEEP_INVENTORY_UPGRADE)
+			{
+				if (!chest.keepInventory)
+				{
+					chest.keepInventory = true;
+					chest.markDirty();
+					stack.shrink(1);
+				}
+
+				return true;
+			}
+			else if (item == QuartzChestsItems.GLOWING_TEXT_UPGRADE)
+			{
+				if (!chest.textGlow)
+				{
+					chest.textGlow = true;
+					chest.markDirty();
+					stack.shrink(1);
+				}
+
+				return true;
+			}
+			else if (item == QuartzChestsItems.BOLD_TEXT_UPGRADE)
+			{
+				if (!chest.textBold)
+				{
+					chest.textBold = true;
+					chest.markDirty();
+					stack.shrink(1);
+				}
+
+				return true;
+			}
+			else if (item == QuartzChestsItems.ITALIC_TEXT_UPGRADE)
+			{
+				if (!chest.textItalic)
+				{
+					chest.textItalic = true;
+					chest.markDirty();
+					stack.shrink(1);
+				}
+
 				return true;
 			}
 
@@ -240,6 +288,7 @@ public class QuartzChestBlock extends HorizontalBlock
 					for (int i = 0; i < chest.inventory.getSlots(); i++)
 					{
 						InventoryHelper.spawnItemStack(world, pos.getX(), pos.getY(), pos.getZ(), chest.inventory.getStackInSlot(i));
+						chest.inventory.setStackInSlot(i, ItemStack.EMPTY);
 					}
 				}
 			}
@@ -293,10 +342,43 @@ public class QuartzChestBlock extends HorizontalBlock
 		CompoundNBT data = stack.getChildTag("BlockEntityTag");
 		dummy.readData(data == null ? new CompoundNBT() : data);
 
-		tooltip.add(new StringTextComponent("").appendSibling(new TranslationTextComponent("block.quartzchests.chest.label").applyTextStyle(TextFormatting.GRAY).appendText(": ")).appendSibling(new StringTextComponent(dummy.label).applyTextStyle(TextFormatting.YELLOW)));
-		tooltip.add(new StringTextComponent("").appendSibling(new TranslationTextComponent("block.quartzchests.chest.chest_color").applyTextStyle(TextFormatting.GRAY).appendText(": ")).appendSibling(new StringTextComponent(String.format("#%06X", dummy.chestColor)).applyTextStyle(TextFormatting.YELLOW)));
-		tooltip.add(new StringTextComponent("").appendSibling(new TranslationTextComponent("block.quartzchests.chest.border_color").applyTextStyle(TextFormatting.GRAY).appendText(": ")).appendSibling(new StringTextComponent(String.format("#%06X", dummy.borderColor)).applyTextStyle(TextFormatting.YELLOW)));
-		tooltip.add(new StringTextComponent("").appendSibling(new TranslationTextComponent("block.quartzchests.chest.text_color").applyTextStyle(TextFormatting.GRAY).appendText(": ")).appendSibling(new StringTextComponent(String.format("#%06X", dummy.textColor)).applyTextStyle(TextFormatting.YELLOW)));
+		tooltip.add(new StringTextComponent("").appendSibling(new TranslationTextComponent("block.quartzchests.chest.label").applyTextStyle(TextFormatting.GRAY).appendText(": ")).appendSibling(dummy.getDisplayName().applyTextStyle(TextFormatting.YELLOW)));
+
+		for (ColorType type : ColorType.VALUES)
+		{
+			tooltip.add(new StringTextComponent("").appendSibling(new TranslationTextComponent(type.translationKey).applyTextStyle(TextFormatting.GRAY).appendText(": ")).appendSibling(new StringTextComponent(String.format("#%06X", dummy.colors[type.index])).applyTextStyle(TextFormatting.YELLOW)));
+		}
+
 		tooltip.add(new StringTextComponent("").appendSibling(new TranslationTextComponent("block.quartzchests.chest.icon").applyTextStyle(TextFormatting.GRAY).appendText(": ")).appendSibling(dummy.icon.getDisplayName().deepCopy().applyTextStyle(TextFormatting.YELLOW)));
+
+		if (dummy.keepInventory && data != null)
+		{
+			tooltip.add(new StringTextComponent("").appendSibling(new TranslationTextComponent("block.quartzchests.chest.slots_used", data.getList("items", Constants.NBT.TAG_COMPOUND).size(), 54).applyTextStyle(TextFormatting.DARK_GRAY)));
+		}
+
+		if (dummy.keepInventory || dummy.textGlow || dummy.textBold || dummy.textItalic)
+		{
+			tooltip.add(new TranslationTextComponent("block.quartzchests.chest.upgrades").applyTextStyle(TextFormatting.AQUA));
+
+			if (dummy.keepInventory)
+			{
+				tooltip.add(new StringTextComponent("+ ").applyTextStyle(TextFormatting.GREEN).appendSibling(new TranslationTextComponent("item.quartzchests.keep_inventory_upgrade")));
+			}
+
+			if (dummy.textGlow)
+			{
+				tooltip.add(new StringTextComponent("+ ").applyTextStyle(TextFormatting.GREEN).appendSibling(new TranslationTextComponent("item.quartzchests.glowing_text_upgrade")));
+			}
+
+			if (dummy.textBold)
+			{
+				tooltip.add(new StringTextComponent("+ ").applyTextStyle(TextFormatting.GREEN).appendSibling(new TranslationTextComponent("item.quartzchests.bold_text_upgrade")));
+			}
+
+			if (dummy.textItalic)
+			{
+				tooltip.add(new StringTextComponent("+ ").applyTextStyle(TextFormatting.GREEN).appendSibling(new TranslationTextComponent("item.quartzchests.italic_text_upgrade")));
+			}
+		}
 	}
 }

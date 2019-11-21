@@ -1,0 +1,13 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern": [
+		"SSS",
+		" Q ",
+		"SSS"
+	],
+	"key": {
+		"Q": {"tag": "forge:gems/quartz"},
+		"S": {"tag": "forge:rods/wooden"}
+	},
+	"result": {"item": "quartzchests:upgrade"}
+}

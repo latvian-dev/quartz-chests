@@ -5,6 +5,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SUpdateTileEntityPacket;
+import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.INameable;
@@ -25,16 +26,13 @@ import javax.annotation.Nullable;
 /**
  * @author LatvianModder
  */
-public class QuartzChestEntity extends TileEntity implements INameable
+public class QuartzChestEntity extends TileEntity implements INameable, ITickableTileEntity
 {
-	public static final int DEFAULT_CHEST_COLOR = 0xEAD8C5;
-	public static final int DEFAULT_BORDER_COLOR = 0x4A4040;
-	public static final int DEFAULT_TEXT_COLOR = 0x222222;
-
+	private boolean isDirty, sendUpdate;
+	public double lidAngle;
+	public double prevLidAngle;
 	public String label;
-	public int chestColor;
-	public int borderColor;
-	public int textColor;
+	public int[] colors;
 	public ItemStack icon;
 	public ItemStackHandler inventory;
 	private final LazyOptional<IItemHandler> inventoryCap;
@@ -47,10 +45,15 @@ public class QuartzChestEntity extends TileEntity implements INameable
 	public QuartzChestEntity()
 	{
 		super(QuartzChestsBlockEntities.CHEST);
+		isDirty = sendUpdate = false;
 		label = "";
-		chestColor = DEFAULT_CHEST_COLOR;
-		borderColor = DEFAULT_BORDER_COLOR;
-		textColor = DEFAULT_TEXT_COLOR;
+		colors = new int[ColorType.VALUES.length];
+
+		for (ColorType type : ColorType.VALUES)
+		{
+			colors[type.index] = type.defaultColor;
+		}
+
 		icon = ItemStack.EMPTY;
 
 		inventory = new ItemStackHandler(54)
@@ -58,7 +61,7 @@ public class QuartzChestEntity extends TileEntity implements INameable
 			@Override
 			protected void onContentsChanged(int slot)
 			{
-				markDirty();
+				isDirty = true;
 			}
 		};
 
@@ -77,19 +80,14 @@ public class QuartzChestEntity extends TileEntity implements INameable
 			nbt.putString("label", label);
 		}
 
-		if (chestColor != DEFAULT_CHEST_COLOR)
+		for (ColorType type : ColorType.VALUES)
 		{
-			nbt.putInt("chest_color", chestColor);
-		}
+			colors[type.index] &= 0xFFFFFF;
 
-		if (borderColor != DEFAULT_BORDER_COLOR)
-		{
-			nbt.putInt("border_color", borderColor);
-		}
-
-		if (textColor != DEFAULT_TEXT_COLOR)
-		{
-			nbt.putInt("text_color", textColor);
+			if (colors[type.index] != type.defaultColor)
+			{
+				nbt.putInt(type.nbt, colors[type.index]);
+			}
 		}
 
 		if (!icon.isEmpty())
@@ -133,9 +131,17 @@ public class QuartzChestEntity extends TileEntity implements INameable
 	public void readVisualData(CompoundNBT nbt)
 	{
 		label = nbt.getString("label");
-		chestColor = nbt.contains("chest_color") ? nbt.getInt("chest_color") : DEFAULT_CHEST_COLOR;
-		borderColor = nbt.contains("border_color") ? nbt.getInt("border_color") : DEFAULT_BORDER_COLOR;
-		textColor = nbt.contains("text_color") ? nbt.getInt("text_color") : DEFAULT_TEXT_COLOR;
+
+		for (ColorType type : ColorType.VALUES)
+		{
+			colors[type.index] = type.defaultColor;
+
+			if (nbt.contains(type.nbt))
+			{
+				colors[type.index] = 0xFFFFFF & nbt.getInt(type.nbt);
+			}
+		}
+
 		icon = nbt.contains("icon") ? ItemStack.read(nbt.getCompound("icon")) : ItemStack.EMPTY;
 		textGlow = nbt.getBoolean("text_glow");
 		textBold = nbt.getBoolean("text_bold");
@@ -232,23 +238,14 @@ public class QuartzChestEntity extends TileEntity implements INameable
 	@Override
 	public void markDirty()
 	{
-		if (world != null)
-		{
-			updateContainingBlockInfo();
-			world.markChunkDirty(pos, this);
-		}
+		sendUpdate = true;
+		isDirty = true;
 	}
 
 	public void containerOpened()
 	{
 		openContainers++;
-
-		if (!world.isRemote)
-		{
-			world.playSound(null, pos, SoundEvents.BLOCK_CHEST_OPEN, SoundCategory.BLOCKS, 0.5F, world.rand.nextFloat() * 0.1F + 0.9F);
-		}
-
-		world.markAndNotifyBlock(pos, null, getBlockState(), getBlockState(), Constants.BlockFlags.DEFAULT);
+		sendUpdate = true;
 	}
 
 	public void containerClosed()
@@ -259,11 +256,60 @@ public class QuartzChestEntity extends TileEntity implements INameable
 		{
 			openContainers = 0;
 		}
-		else if (!world.isRemote)
+
+		sendUpdate = true;
+	}
+
+	@Override
+	public void tick()
+	{
+		prevLidAngle = lidAngle;
+
+		if (openContainers > 0 && lidAngle == 0D)
 		{
-			world.playSound(null, pos, SoundEvents.BLOCK_CHEST_CLOSE, SoundCategory.BLOCKS, 0.5F, world.rand.nextFloat() * 0.1F + 0.9F);
+			world.playSound(null, pos, SoundEvents.BLOCK_CHEST_OPEN, SoundCategory.BLOCKS, 0.5F, world.rand.nextFloat() * 0.1F + 0.9F);
 		}
 
-		world.markAndNotifyBlock(pos, null, getBlockState(), getBlockState(), Constants.BlockFlags.DEFAULT);
+		if (openContainers == 0 && lidAngle > 0D || openContainers > 0 && lidAngle < 1D)
+		{
+			double a = lidAngle;
+
+			if (openContainers > 0)
+			{
+				lidAngle += 0.1D;
+			}
+			else
+			{
+				lidAngle -= 0.1D;
+			}
+
+			if (lidAngle > 1D)
+			{
+				lidAngle = 1D;
+			}
+
+			if (lidAngle < 0.5D && a >= 0.5D)
+			{
+				world.playSound(null, pos, SoundEvents.BLOCK_CHEST_CLOSE, SoundCategory.BLOCKS, 0.5F, world.rand.nextFloat() * 0.1F + 0.9F);
+			}
+
+			if (lidAngle < 0D)
+			{
+				lidAngle = 0D;
+			}
+		}
+
+		if (isDirty && world != null)
+		{
+			isDirty = false;
+			updateContainingBlockInfo();
+			world.markChunkDirty(pos, this);
+		}
+
+		if (sendUpdate && world != null)
+		{
+			sendUpdate = false;
+			world.markAndNotifyBlock(pos, null, getBlockState(), getBlockState(), Constants.BlockFlags.DEFAULT);
+		}
 	}
 }

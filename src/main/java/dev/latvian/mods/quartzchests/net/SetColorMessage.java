@@ -1,10 +1,10 @@
 package dev.latvian.mods.quartzchests.net;
 
+import dev.latvian.mods.quartzchests.block.entity.ColorType;
 import dev.latvian.mods.quartzchests.block.entity.QuartzChestEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 import java.util.function.Supplier;
@@ -12,26 +12,30 @@ import java.util.function.Supplier;
 /**
  * @author LatvianModder
  */
-public class SetChestColorMessage
+public class SetColorMessage
 {
 	private BlockPos pos;
+	private ColorType type;
 	private int color;
 
-	public SetChestColorMessage(BlockPos p, int c)
+	public SetColorMessage(BlockPos p, ColorType t, int c)
 	{
 		pos = p;
+		type = t;
 		color = c;
 	}
 
-	public SetChestColorMessage(PacketBuffer buf)
+	public SetColorMessage(PacketBuffer buf)
 	{
 		pos = buf.readBlockPos();
+		type = ColorType.VALUES[buf.readByte()];
 		color = buf.readInt();
 	}
 
 	public void write(PacketBuffer buf)
 	{
 		buf.writeBlockPos(pos);
+		buf.writeByte(type.index);
 		buf.writeInt(color);
 	}
 
@@ -42,9 +46,8 @@ public class SetChestColorMessage
 
 			if (entity instanceof QuartzChestEntity)
 			{
-				((QuartzChestEntity) entity).chestColor = color;
+				((QuartzChestEntity) entity).colors[type.index] = color;
 				entity.markDirty();
-				entity.getWorld().markAndNotifyBlock(pos, null, entity.getBlockState(), entity.getBlockState(), Constants.BlockFlags.DEFAULT);
 			}
 		});
 	}

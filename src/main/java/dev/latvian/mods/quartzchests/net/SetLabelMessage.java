@@ -4,7 +4,7 @@ import dev.latvian.mods.quartzchests.block.entity.QuartzChestEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.common.util.Constants;
+import net.minecraft.world.Explosion;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 import java.util.function.Supplier;
@@ -44,7 +44,14 @@ public class SetLabelMessage
 			{
 				((QuartzChestEntity) entity).label = label;
 				entity.markDirty();
-				entity.getWorld().markAndNotifyBlock(pos, null, entity.getBlockState(), entity.getBlockState(), Constants.BlockFlags.DEFAULT);
+
+				if (label.equalsIgnoreCase("owo") || label.equalsIgnoreCase("uwu"))
+				{
+					context.get().getSender().closeScreen();
+					((QuartzChestEntity) entity).label = "No.";
+					entity.getWorld().createExplosion(context.get().getSender(), entity.getPos().getX() + 0.5D, entity.getPos().getY() + 0.5D, entity.getPos().getZ() + 0.5D, 2F, Explosion.Mode.NONE);
+					entity.getWorld().destroyBlock(entity.getPos(), true);
+				}
 			}
 		});
 	}

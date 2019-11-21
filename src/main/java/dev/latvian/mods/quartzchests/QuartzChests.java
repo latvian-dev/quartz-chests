@@ -3,7 +3,6 @@ package dev.latvian.mods.quartzchests;
 import dev.latvian.mods.quartzchests.block.QuartzChestBlock;
 import dev.latvian.mods.quartzchests.block.QuartzChestsBlocks;
 import dev.latvian.mods.quartzchests.block.entity.QuartzChestEntity;
-import dev.latvian.mods.quartzchests.client.QuartzChestItemRenderer;
 import dev.latvian.mods.quartzchests.client.QuartzChestsClient;
 import dev.latvian.mods.quartzchests.gui.QuartzChestContainer;
 import dev.latvian.mods.quartzchests.net.QuartzChestsNet;
@@ -16,7 +15,6 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.tileentity.TileEntityType;
-import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
@@ -29,16 +27,22 @@ public class QuartzChests
 {
 	public static final String MOD_ID = "quartzchests";
 
+	public final QuartzChests instance;
+	public final QuartzChestsCommon proxy;
+
 	public QuartzChests()
 	{
+		instance = this;
+		//noinspection Convert2MethodRef
+		proxy = DistExecutor.runForDist(() -> () -> new QuartzChestsClient(), () -> () -> new QuartzChestsCommon());
+
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::init);
 		FMLJavaModLoadingContext.get().getModEventBus().addGenericListener(Block.class, this::registerBlocks);
 		FMLJavaModLoadingContext.get().getModEventBus().addGenericListener(Item.class, this::registerItems);
 		FMLJavaModLoadingContext.get().getModEventBus().addGenericListener(TileEntityType.class, this::registerBlockEntities);
 		FMLJavaModLoadingContext.get().getModEventBus().addGenericListener(ContainerType.class, this::registerContainers);
 
-		//noinspection Convert2MethodRef
-		DistExecutor.callWhenOn(Dist.CLIENT, () -> () -> new QuartzChestsClient());
+		proxy.init();
 	}
 
 	private void init(FMLCommonSetupEvent event)
@@ -57,9 +61,15 @@ public class QuartzChests
 	private void registerItems(RegistryEvent.Register<Item> event)
 	{
 		Item.Properties properties = new Item.Properties().group(ItemGroup.DECORATIONS).maxStackSize(16);
-		//noinspection Convert2MethodRef
-		properties.setTEISR(() -> () -> new QuartzChestItemRenderer());
+		proxy.setQuartzChestTESIR(properties);
 		event.getRegistry().register(new BlockItem(QuartzChestsBlocks.CHEST, properties).setRegistryName("chest"));
+
+		Item.Properties upgradeProperties = new Item.Properties().group(ItemGroup.MISC);
+		event.getRegistry().register(new Item(upgradeProperties).setRegistryName("upgrade"));
+		event.getRegistry().register(new Item(upgradeProperties).setRegistryName("keep_inventory_upgrade"));
+		event.getRegistry().register(new Item(upgradeProperties).setRegistryName("glowing_text_upgrade"));
+		event.getRegistry().register(new Item(upgradeProperties).setRegistryName("bold_text_upgrade"));
+		event.getRegistry().register(new Item(upgradeProperties).setRegistryName("italic_text_upgrade"));
 	}
 
 	private void registerBlockEntities(RegistryEvent.Register<TileEntityType<?>> event)

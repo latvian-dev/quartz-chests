@@ -1,0 +1,8 @@
+{
+	"type": "minecraft:crafting_shapeless",
+	"ingredients": [
+		{"item": "quartzchests:upgrade"},
+		{"tag": "forge:slimeballs"}
+	],
+	"result": {"item": "quartzchests:bold_text_upgrade"}
+}
