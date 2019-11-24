@@ -121,6 +121,36 @@ public class QuartzChestRenderer extends TileEntityRenderer<QuartzChestEntity>
 
 			GlStateManager.color4f(1F, 1F, 1F, 1F);
 
+			if (!chest.icon.isEmpty())
+			{
+				GlStateManager.pushMatrix();
+
+				try
+				{
+					Block b = Block.getBlockFromItem(chest.icon.getItem());
+
+					if (b == Blocks.AIR)
+					{
+						GlStateManager.translatef(0.5F, 0.67F, 0.04F);
+						float iS = 0.4F;
+						GlStateManager.scalef(-iS, -iS, iS);
+					}
+					else
+					{
+						GlStateManager.translatef(0.5F, 0.67F, 0.15F);
+						float iS = 0.7F;
+						GlStateManager.scalef(-iS, -iS, iS);
+					}
+
+					mc.getItemRenderer().renderItem(chest.icon, ItemCameraTransforms.TransformType.FIXED);
+				}
+				catch (Exception e)
+				{
+				}
+
+				GlStateManager.popMatrix();
+			}
+
 			if (!chest.hasWorld() || baseModel.top.rotateAngleX == 0F)
 			{
 				if (chest.textGlow && chest.hasWorld())
@@ -158,36 +188,6 @@ public class QuartzChestRenderer extends TileEntityRenderer<QuartzChestEntity>
 				{
 					setLightmapDisabled(false);
 				}
-			}
-
-			if (!chest.icon.isEmpty())
-			{
-				GlStateManager.pushMatrix();
-
-				try
-				{
-					Block b = Block.getBlockFromItem(chest.icon.getItem());
-
-					if (b == Blocks.AIR)
-					{
-						GlStateManager.translatef(0.5F, 0.67F, 0.04F);
-						float iS = 0.4F;
-						GlStateManager.scalef(-iS, -iS, iS);
-					}
-					else
-					{
-						GlStateManager.translatef(0.5F, 0.67F, 0.15F);
-						float iS = 0.7F;
-						GlStateManager.scalef(-iS, -iS, iS);
-					}
-
-					mc.getItemRenderer().renderItem(chest.icon, ItemCameraTransforms.TransformType.FIXED);
-				}
-				catch (Exception e)
-				{
-				}
-
-				GlStateManager.popMatrix();
 			}
 		}
 
