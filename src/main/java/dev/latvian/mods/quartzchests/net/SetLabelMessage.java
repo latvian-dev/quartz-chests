@@ -54,5 +54,7 @@ public class SetLabelMessage
 				}
 			}
 		});
+
+		context.get().setPacketHandled(true);
 	}
 }

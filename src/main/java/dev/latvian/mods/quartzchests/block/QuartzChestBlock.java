@@ -47,6 +47,7 @@ import net.minecraft.world.storage.loot.LootContext;
 import net.minecraft.world.storage.loot.LootParameters;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.common.ToolType;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.network.NetworkHooks;
 
@@ -138,6 +139,12 @@ public class QuartzChestBlock extends HorizontalBlock
 	public BlockRenderType getRenderType(BlockState state)
 	{
 		return BlockRenderType.ENTITYBLOCK_ANIMATED;
+	}
+
+	@Override
+	public boolean isToolEffective(BlockState state, ToolType tool)
+	{
+		return tool == ToolType.PICKAXE || tool == ToolType.AXE;
 	}
 
 	@Override

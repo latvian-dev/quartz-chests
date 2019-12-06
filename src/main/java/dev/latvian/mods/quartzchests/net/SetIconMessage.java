@@ -46,5 +46,7 @@ public class SetIconMessage
 				entity.markDirty();
 			}
 		});
+
+		context.get().setPacketHandled(true);
 	}
 }

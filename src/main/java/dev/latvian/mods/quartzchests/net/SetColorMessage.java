@@ -50,5 +50,7 @@ public class SetColorMessage
 				entity.markDirty();
 			}
 		});
+
+		context.get().setPacketHandled(true);
 	}
 }
