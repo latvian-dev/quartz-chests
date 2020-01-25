@@ -1,7 +1,7 @@
 package dev.latvian.mods.quartzchests.gui;
 
 import com.mojang.blaze3d.platform.GlStateManager;
-import dev.latvian.mods.quartzchests.QuartzChests;
+import com.mojang.blaze3d.systems.RenderSystem;
 import dev.latvian.mods.quartzchests.block.QuartzChestsBlocks;
 import dev.latvian.mods.quartzchests.block.entity.ColorType;
 import dev.latvian.mods.quartzchests.net.QuartzChestsNet;
@@ -30,8 +30,8 @@ import java.util.Arrays;
  */
 public class ColorSelectorScreen extends Screen
 {
-	private static final ResourceLocation TEXTURE = new ResourceLocation(QuartzChests.MOD_ID, "textures/gui/color_selector.png");
-	private static final ResourceLocation HUE_TEXTURE = new ResourceLocation(QuartzChests.MOD_ID, "textures/gui/color_selector_hue.png");
+	private static final ResourceLocation TEXTURE = new ResourceLocation("quartzchests:textures/gui/color_selector.png");
+	private static final ResourceLocation HUE_TEXTURE = new ResourceLocation("quartzchests:textures/gui/color_selector_hue.png");
 
 	public final ColorType type;
 	private TextFieldWidget colorField;
@@ -350,11 +350,11 @@ public class ColorSelectorScreen extends Screen
 		int y = (height - ySize) / 2;
 
 		renderBackground();
-		GlStateManager.color4f(1F, 1F, 1F, 1F);
+		RenderSystem.color4f(1F, 1F, 1F, 1F);
 		minecraft.getTextureManager().bindTexture(TEXTURE);
 		blit(x, y, 0, 0, xSize, ySize);
 
-		if (prevMouseX != mouseX && GLFW.glfwGetMouseButton(minecraft.mainWindow.getHandle(), GLFW.GLFW_MOUSE_BUTTON_LEFT) == GLFW.GLFW_PRESS)
+		if (prevMouseX != mouseX && GLFW.glfwGetMouseButton(minecraft.getWindow().getHandle(), GLFW.GLFW_MOUSE_BUTTON_LEFT) == GLFW.GLFW_PRESS)
 		{
 			checkHSBMouse(mouseX, mouseY);
 		}
@@ -362,32 +362,32 @@ public class ColorSelectorScreen extends Screen
 		minecraft.getTextureManager().bindTexture(HUE_TEXTURE);
 		innerBlit(x + 10, x + 129, y + 33, y + 44, 0, 0, 1, 0, 1);
 
-		GlStateManager.disableTexture();
-		GlStateManager.enableBlend();
-		GlStateManager.disableAlphaTest();
-		GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-		GlStateManager.shadeModel(GL11.GL_SMOOTH);
+		RenderSystem.disableTexture();
+		RenderSystem.enableBlend();
+		RenderSystem.disableAlphaTest();
+		RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+		RenderSystem.shadeModel(GL11.GL_SMOOTH);
 
 		Tessellator tessellator = Tessellator.getInstance();
 		BufferBuilder bufferbuilder = tessellator.getBuffer();
 		bufferbuilder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
-		bufferbuilder.pos(x + 10, y + 58, 0D).color(rgbMinS[0], rgbMinS[1], rgbMinS[2], 1F).endVertex();
-		bufferbuilder.pos(x + 129, y + 58, 0D).color(rgbMaxS[0], rgbMaxS[1], rgbMaxS[2], 1F).endVertex();
-		bufferbuilder.pos(x + 129, y + 47, 0D).color(rgbMaxS[0], rgbMaxS[1], rgbMaxS[2], 1F).endVertex();
-		bufferbuilder.pos(x + 10, y + 47, 0D).color(rgbMinS[0], rgbMinS[1], rgbMinS[2], 1F).endVertex();
+		bufferbuilder.vertex(x + 10, y + 58, 0D).color(rgbMinS[0], rgbMinS[1], rgbMinS[2], 1F).endVertex();
+		bufferbuilder.vertex(x + 129, y + 58, 0D).color(rgbMaxS[0], rgbMaxS[1], rgbMaxS[2], 1F).endVertex();
+		bufferbuilder.vertex(x + 129, y + 47, 0D).color(rgbMaxS[0], rgbMaxS[1], rgbMaxS[2], 1F).endVertex();
+		bufferbuilder.vertex(x + 10, y + 47, 0D).color(rgbMinS[0], rgbMinS[1], rgbMinS[2], 1F).endVertex();
 
-		bufferbuilder.pos(x + 10, y + 72, 0D).color(rgbMinB[0], rgbMinB[1], rgbMinB[2], 1F).endVertex();
-		bufferbuilder.pos(x + 129, y + 72, 0D).color(rgbMaxB[0], rgbMaxB[1], rgbMaxB[2], 1F).endVertex();
-		bufferbuilder.pos(x + 129, y + 61, 0D).color(rgbMaxB[0], rgbMaxB[1], rgbMaxB[2], 1F).endVertex();
-		bufferbuilder.pos(x + 10, y + 61, 0D).color(rgbMinB[0], rgbMinB[1], rgbMinB[2], 1F).endVertex();
+		bufferbuilder.vertex(x + 10, y + 72, 0D).color(rgbMinB[0], rgbMinB[1], rgbMinB[2], 1F).endVertex();
+		bufferbuilder.vertex(x + 129, y + 72, 0D).color(rgbMaxB[0], rgbMaxB[1], rgbMaxB[2], 1F).endVertex();
+		bufferbuilder.vertex(x + 129, y + 61, 0D).color(rgbMaxB[0], rgbMaxB[1], rgbMaxB[2], 1F).endVertex();
+		bufferbuilder.vertex(x + 10, y + 61, 0D).color(rgbMinB[0], rgbMinB[1], rgbMinB[2], 1F).endVertex();
 		tessellator.draw();
 
-		GlStateManager.shadeModel(GL11.GL_FLAT);
-		GlStateManager.disableBlend();
-		GlStateManager.enableAlphaTest();
-		GlStateManager.enableTexture();
+		RenderSystem.shadeModel(GL11.GL_FLAT);
+		RenderSystem.disableBlend();
+		RenderSystem.enableAlphaTest();
+		RenderSystem.enableTexture();
 
-		GlStateManager.color4f(1F, 1F, 1F, 1F);
+		RenderSystem.color4f(1F, 1F, 1F, 1F);
 		minecraft.getTextureManager().bindTexture(TEXTURE);
 		blit(x + 10 + (int) (119F * hsb[0]), y + 33, 0, 108, 1, 11);
 		blit(x + 10 + (int) (119F * hsb[1]), y + 47, 0, 108, 1, 11);
@@ -399,12 +399,14 @@ public class ColorSelectorScreen extends Screen
 		String t = title.getFormattedText();
 		font.drawString(t, x + 9, y + 7, 4210752);
 
-		RenderHelper.enableGUIStandardItemLighting();
+		RenderHelper.enableGuiDepthLighting();
+		RenderSystem.disableLighting();
+		RenderSystem.enableRescaleNormal();
 
-		GlStateManager.pushMatrix();
-		GlStateManager.translatef(x + 149F, y + 23F, 16F);
-		GlStateManager.scalef(4F, 4F, 1F);
-		blitOffset = 200;
+		RenderSystem.pushMatrix();
+		RenderSystem.translatef(x + 149F, y + 23F, 16F);
+		RenderSystem.scalef(4F, 4F, 1F);
+		setBlitOffset(200);
 		itemRenderer.zLevel = 200F;
 		net.minecraft.client.gui.FontRenderer f = preview.getItem().getFontRenderer(preview);
 
@@ -415,13 +417,13 @@ public class ColorSelectorScreen extends Screen
 
 		itemRenderer.renderItemAndEffectIntoGUI(preview, 0, 0);
 		itemRenderer.renderItemOverlayIntoGUI(f, preview, 0, 0, "");
-		blitOffset = 0;
+		setBlitOffset(0);
 		itemRenderer.zLevel = 0F;
-		GlStateManager.popMatrix();
-		GlStateManager.color4f(1F, 1F, 1F, 1F);
+		RenderSystem.popMatrix();
+		RenderSystem.color4f(1F, 1F, 1F, 1F);
 
-		GlStateManager.enableLighting();
-		GlStateManager.enableDepthTest();
-		RenderHelper.enableStandardItemLighting();
+		RenderSystem.enableLighting();
+		RenderSystem.enableDepthTest();
+		RenderHelper.disableGuiDepthLighting();
 	}
 }

@@ -10,17 +10,3 @@ authors="LatvianModder"
 description='''
 Adds portable chests with decoration options
 '''
-
-[[dependencies.quartzchests]]
-    modId="forge"
-    mandatory=true
-    versionRange="[28,)"
-    ordering="NONE"
-    side="BOTH"
-
-[[dependencies.quartzchests]]
-    modId="minecraft"
-    mandatory=true
-    versionRange="[1.14.4]"
-    ordering="NONE"
-    side="BOTH"

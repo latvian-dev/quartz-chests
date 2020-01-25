@@ -1,7 +1,6 @@
 package dev.latvian.mods.quartzchests.gui;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-import dev.latvian.mods.quartzchests.QuartzChests;
+import com.mojang.blaze3d.systems.RenderSystem;
 import dev.latvian.mods.quartzchests.block.QuartzChestsBlocks;
 import dev.latvian.mods.quartzchests.block.entity.ColorType;
 import dev.latvian.mods.quartzchests.net.QuartzChestsNet;
@@ -28,7 +27,7 @@ import java.util.Collections;
  */
 public class QuartzChestScreen extends ContainerScreen<QuartzChestContainer>
 {
-	private static final ResourceLocation TEXTURE = new ResourceLocation(QuartzChests.MOD_ID, "textures/gui/chest.png");
+	private static final ResourceLocation TEXTURE = new ResourceLocation("quartzchests:textures/gui/chest.png");
 
 	private TextFieldWidget labelField;
 	private Button chestColorButton, borderColorButton, textColorButton, iconButton;
@@ -142,7 +141,7 @@ public class QuartzChestScreen extends ContainerScreen<QuartzChestContainer>
 		renderBackground();
 		super.render(mouseX, mouseY, partialTicks);
 		renderHoveredToolTip(mouseX, mouseY);
-		GlStateManager.disableLighting();
+		RenderSystem.disableLighting();
 		labelField.render(mouseX, mouseY, partialTicks);
 
 		if (chestColorButton.isHovered())
@@ -167,12 +166,12 @@ public class QuartzChestScreen extends ContainerScreen<QuartzChestContainer>
 
 		if (!container.chest.icon.isEmpty())
 		{
-			RenderHelper.enableGUIStandardItemLighting();
+			RenderHelper.enableGuiDepthLighting();
 
-			GlStateManager.pushMatrix();
-			GlStateManager.translatef(guiLeft + 159F, guiTop + 6F, 16F);
-			GlStateManager.scalef(0.5F, 0.5F, 1F);
-			blitOffset = 200;
+			RenderSystem.pushMatrix();
+			RenderSystem.translatef(guiLeft + 159F, guiTop + 6F, 16F);
+			RenderSystem.scalef(0.5F, 0.5F, 1F);
+			setBlitOffset(200);
 			itemRenderer.zLevel = 200F;
 			net.minecraft.client.gui.FontRenderer f = container.chest.icon.getItem().getFontRenderer(container.chest.icon);
 
@@ -183,14 +182,15 @@ public class QuartzChestScreen extends ContainerScreen<QuartzChestContainer>
 
 			itemRenderer.renderItemAndEffectIntoGUI(container.chest.icon, 0, 0);
 			itemRenderer.renderItemOverlayIntoGUI(f, container.chest.icon, 0, 0, "");
-			blitOffset = 0;
+			setBlitOffset(0);
 			itemRenderer.zLevel = 0F;
-			GlStateManager.popMatrix();
-			GlStateManager.color4f(1F, 1F, 1F, 1F);
+			RenderSystem.popMatrix();
+			RenderSystem.color4f(1F, 1F, 1F, 1F);
 
-			GlStateManager.enableLighting();
-			GlStateManager.enableDepthTest();
-			RenderHelper.enableStandardItemLighting();
+			RenderSystem.enableLighting();
+			RenderSystem.enableDepthTest();
+			RenderHelper.disableGuiDepthLighting();
+			//RenderHelper.enableStandardItemLighting();
 		}
 	}
 
@@ -203,17 +203,17 @@ public class QuartzChestScreen extends ContainerScreen<QuartzChestContainer>
 	@Override
 	protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY)
 	{
-		GlStateManager.color4f(1F, 1F, 1F, 1F);
+		RenderSystem.color4f(1F, 1F, 1F, 1F);
 		minecraft.getTextureManager().bindTexture(TEXTURE);
 		blit(guiLeft, guiTop, 0, 0, xSize, ySize);
 
 		for (int i = 0; i < ColorType.VALUES.length; i++)
 		{
 			int c = container.chest.colors[i];
-			GlStateManager.color4f(((c >> 16) & 255) / 255F, ((c >> 8) & 255) / 255F, (c & 255) / 255F, 1F);
+			RenderSystem.color4f(((c >> 16) & 255) / 255F, ((c >> 8) & 255) / 255F, (c & 255) / 255F, 1F);
 			blit(guiLeft + 118 + i * 13, guiTop + 4, 177, 0, 12, 12);
 		}
 
-		GlStateManager.color4f(1F, 1F, 1F, 1F);
+		RenderSystem.color4f(1F, 1F, 1F, 1F);
 	}
 }

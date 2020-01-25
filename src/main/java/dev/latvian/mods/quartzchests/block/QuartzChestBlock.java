@@ -28,7 +28,7 @@ import net.minecraft.pathfinding.PathType;
 import net.minecraft.state.StateContainer;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockRenderLayer;
+import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
@@ -122,19 +122,6 @@ public class QuartzChestBlock extends HorizontalBlock
 	}
 
 	@Override
-	public BlockRenderLayer getRenderLayer()
-	{
-		return BlockRenderLayer.CUTOUT;
-	}
-
-	@Override
-	@Deprecated
-	public boolean hasCustomBreakingProgress(BlockState state)
-	{
-		return true;
-	}
-
-	@Override
 	@Deprecated
 	public BlockRenderType getRenderType(BlockState state)
 	{
@@ -149,11 +136,11 @@ public class QuartzChestBlock extends HorizontalBlock
 
 	@Override
 	@Deprecated
-	public boolean onBlockActivated(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult hit)
+	public ActionResultType onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTraceResult)
 	{
 		if (world.isRemote || player.isSpectator())
 		{
-			return true;
+			return ActionResultType.SUCCESS;
 		}
 
 		TileEntity entity = world.getTileEntity(pos);
@@ -169,11 +156,11 @@ public class QuartzChestBlock extends HorizontalBlock
 				chest.label = stack.getDisplayName().getString();
 				chest.markDirty();
 				world.markAndNotifyBlock(pos, null, state, state, Constants.BlockFlags.DEFAULT_AND_RERENDER);
-				return true;
+				return ActionResultType.SUCCESS;
 			}
 			else if (item instanceof DyeItem)
 			{
-				if (!chest.label.isEmpty() && hit.getFace() == state.get(HORIZONTAL_FACING) && (hit.getHitVec().y - pos.getY()) > 0.6D)
+				if (!chest.label.isEmpty() && rayTraceResult.getFace() == state.get(HORIZONTAL_FACING) && (rayTraceResult.getHitVec().y - pos.getY()) > 0.6D)
 				{
 					chest.colors[ColorType.TEXT.index] = 0xFF000000 | ((DyeItem) item).getDyeColor().getColorValue();
 				}
@@ -184,7 +171,7 @@ public class QuartzChestBlock extends HorizontalBlock
 
 				chest.markDirty();
 				world.markAndNotifyBlock(pos, null, state, state, Constants.BlockFlags.DEFAULT_AND_RERENDER);
-				return true;
+				return ActionResultType.SUCCESS;
 			}
 			else if (item == QuartzChestsItems.KEEP_INVENTORY_UPGRADE)
 			{
@@ -195,7 +182,7 @@ public class QuartzChestBlock extends HorizontalBlock
 					stack.shrink(1);
 				}
 
-				return true;
+				return ActionResultType.SUCCESS;
 			}
 			else if (item == QuartzChestsItems.GLOWING_TEXT_UPGRADE)
 			{
@@ -206,7 +193,7 @@ public class QuartzChestBlock extends HorizontalBlock
 					stack.shrink(1);
 				}
 
-				return true;
+				return ActionResultType.SUCCESS;
 			}
 			else if (item == QuartzChestsItems.BOLD_TEXT_UPGRADE)
 			{
@@ -217,7 +204,7 @@ public class QuartzChestBlock extends HorizontalBlock
 					stack.shrink(1);
 				}
 
-				return true;
+				return ActionResultType.SUCCESS;
 			}
 			else if (item == QuartzChestsItems.ITALIC_TEXT_UPGRADE)
 			{
@@ -228,7 +215,7 @@ public class QuartzChestBlock extends HorizontalBlock
 					stack.shrink(1);
 				}
 
-				return true;
+				return ActionResultType.SUCCESS;
 			}
 
 			NetworkHooks.openGui((ServerPlayerEntity) player, new INamedContainerProvider()
@@ -247,7 +234,7 @@ public class QuartzChestBlock extends HorizontalBlock
 			}, pos);
 		}
 
-		return true;
+		return ActionResultType.SUCCESS;
 	}
 
 	@Override

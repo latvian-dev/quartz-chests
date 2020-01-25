@@ -14,7 +14,10 @@ import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityType;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
@@ -22,13 +25,12 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.network.IContainerFactory;
 
-@Mod(QuartzChests.MOD_ID)
+@Mod("quartzchests")
 public class QuartzChests
 {
-	public static final String MOD_ID = "quartzchests";
-
 	public final QuartzChests instance;
 	public final QuartzChestsCommon proxy;
+	public final ItemGroup itemGroup;
 
 	public QuartzChests()
 	{
@@ -43,6 +45,15 @@ public class QuartzChests
 		FMLJavaModLoadingContext.get().getModEventBus().addGenericListener(ContainerType.class, this::registerContainers);
 
 		proxy.init();
+		itemGroup = new ItemGroup("quartzchests")
+		{
+			@Override
+			@OnlyIn(Dist.CLIENT)
+			public ItemStack createIcon()
+			{
+				return new ItemStack(QuartzChestsBlocks.CHEST);
+			}
+		};
 	}
 
 	private void init(FMLCommonSetupEvent event)
@@ -60,11 +71,11 @@ public class QuartzChests
 
 	private void registerItems(RegistryEvent.Register<Item> event)
 	{
-		Item.Properties properties = new Item.Properties().group(ItemGroup.DECORATIONS).maxStackSize(16);
+		Item.Properties properties = new Item.Properties().group(itemGroup).maxStackSize(16);
 		proxy.setQuartzChestTESIR(properties);
 		event.getRegistry().register(new BlockItem(QuartzChestsBlocks.CHEST, properties).setRegistryName("chest"));
 
-		Item.Properties upgradeProperties = new Item.Properties().group(ItemGroup.MISC);
+		Item.Properties upgradeProperties = new Item.Properties().group(itemGroup);
 		event.getRegistry().register(new Item(upgradeProperties).setRegistryName("upgrade"));
 		event.getRegistry().register(new Item(upgradeProperties).setRegistryName("keep_inventory_upgrade"));
 		event.getRegistry().register(new Item(upgradeProperties).setRegistryName("glowing_text_upgrade"));

@@ -1,6 +1,5 @@
 package dev.latvian.mods.quartzchests.net;
 
-import dev.latvian.mods.quartzchests.QuartzChests;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.network.NetworkRegistry;
 import net.minecraftforge.fml.network.simple.SimpleChannel;
@@ -13,7 +12,7 @@ public class QuartzChestsNet
 	public static void init()
 	{
 		MAIN = NetworkRegistry.ChannelBuilder
-				.named(new ResourceLocation(QuartzChests.MOD_ID, "main"))
+				.named(new ResourceLocation("quartzchests:main"))
 				.clientAcceptedVersions(MAIN_VERSION::equals)
 				.serverAcceptedVersions(MAIN_VERSION::equals)
 				.networkProtocolVersion(() -> MAIN_VERSION)
