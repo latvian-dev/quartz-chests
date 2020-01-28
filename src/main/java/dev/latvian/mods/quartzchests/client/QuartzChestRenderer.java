@@ -19,10 +19,10 @@ import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.model.Material;
 import net.minecraft.client.renderer.model.Model;
 import net.minecraft.client.renderer.model.ModelRenderer;
+import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
-import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
@@ -40,14 +40,14 @@ public class QuartzChestRenderer extends TileEntityRenderer<QuartzChestEntity>
 
 		public QuartzChestModel()
 		{
-			super(RenderType::getEntityCutout);
+			super(RenderType::entityCutout);
 			textureWidth = 64;
 			textureHeight = 64;
 			bottom = new ModelRenderer(this, 0, 19);
-			bottom.addCuboid(1.0F, 0.0F, 1.0F, 14.0F, 10.0F, 14.0F, 0.0F);
+			bottom.addBox(1.0F, 0.0F, 1.0F, 14.0F, 10.0F, 14.0F, 0.0F);
 
 			top = new ModelRenderer(this, 0, 0);
-			top.addCuboid(1.0F, 0.0F, 0.0F, 14.0F, 5.0F, 14.0F, 0.0F);
+			top.addBox(1.0F, 0.0F, 0.0F, 14.0F, 5.0F, 14.0F, 0.0F);
 			top.rotationPointY = 9.0F;
 			top.rotationPointZ = 1.0F;
 		}
@@ -60,8 +60,8 @@ public class QuartzChestRenderer extends TileEntityRenderer<QuartzChestEntity>
 		}
 	}
 
-	private static final Material TEXTURE_BASE = new Material(PlayerContainer.BLOCK_ATLAS_TEXTURE, new ResourceLocation("quartzchests:block/chest_base"));
-	private static final Material TEXTURE_BORDERS = new Material(PlayerContainer.BLOCK_ATLAS_TEXTURE, new ResourceLocation("quartzchests:block/chest_borders"));
+	private static final Material TEXTURE_BASE = new Material(AtlasTexture.LOCATION_BLOCKS_TEXTURE, new ResourceLocation("quartzchests:block/chest_base"));
+	private static final Material TEXTURE_BORDERS = new Material(AtlasTexture.LOCATION_BLOCKS_TEXTURE, new ResourceLocation("quartzchests:block/chest_borders"));
 
 	private final QuartzChestModel baseModel, bordersModel;
 
@@ -81,7 +81,7 @@ public class QuartzChestRenderer extends TileEntityRenderer<QuartzChestEntity>
 		matrixStack.push();
 		float f = blockstate.get(HorizontalBlock.HORIZONTAL_FACING).getHorizontalAngle();
 		matrixStack.translate(0.5D, 0.5D, 0.5D);
-		matrixStack.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(-f));
+		matrixStack.rotate(Vector3f.YP.rotationDegrees(-f));
 		matrixStack.translate(-0.5D, -0.5D, -0.5D);
 
 		if (world != null)
@@ -96,8 +96,8 @@ public class QuartzChestRenderer extends TileEntityRenderer<QuartzChestEntity>
 			baseModel.top.rotateAngleX = bordersModel.top.rotateAngleX = 0F;
 		}
 
-		IVertexBuilder builderBase = TEXTURE_BASE.getVertexConsumer(typeBuffer, RenderType::getEntityCutout);
-		IVertexBuilder builderBorders = TEXTURE_BORDERS.getVertexConsumer(typeBuffer, RenderType::getEntityCutout);
+		IVertexBuilder builderBase = TEXTURE_BASE.getBuffer(typeBuffer, RenderType::entityCutout);
+		IVertexBuilder builderBorders = TEXTURE_BORDERS.getBuffer(typeBuffer, RenderType::entityCutout);
 
 		int baseR = (chest.colors[ColorType.CHEST.index] >> 16) & 255;
 		int baseG = (chest.colors[ColorType.CHEST.index] >> 8) & 255;
@@ -117,19 +117,19 @@ public class QuartzChestRenderer extends TileEntityRenderer<QuartzChestEntity>
 			if (b == Blocks.AIR)
 			{
 				matrixStack.translate(0.5F, 0.33F, 0.96F);
-				matrixStack.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(180F));
+				matrixStack.rotate(Vector3f.YP.rotationDegrees(180F));
 				float iS = 0.4F;
 				matrixStack.scale(iS, iS, iS);
 			}
 			else
 			{
 				matrixStack.translate(0.5F, 0.33F, 0.88F);
-				matrixStack.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(180F));
+				matrixStack.rotate(Vector3f.YP.rotationDegrees(180F));
 				float iS = 0.7F;
 				matrixStack.scale(iS, iS, iS);
 			}
 
-			Minecraft.getInstance().getItemRenderer().renderItem(chest.icon, ItemCameraTransforms.TransformType.FIXED, light1, OverlayTexture.DEFAULT_UV, matrixStack, typeBuffer);
+			Minecraft.getInstance().getItemRenderer().renderItem(chest.icon, ItemCameraTransforms.TransformType.FIXED, light1, OverlayTexture.DEFAULT_LIGHT, matrixStack, typeBuffer);
 			matrixStack.pop();
 		}
 
@@ -161,11 +161,11 @@ public class QuartzChestRenderer extends TileEntityRenderer<QuartzChestEntity>
 				label = TextFormatting.ITALIC + label;
 			}
 
-			int sw1 = dispatcher.getFontRenderer().getStringWidth(label);
+			int sw1 = renderDispatcher.getFontRenderer().getStringWidth(label);
 			float f1 = 1F / (float) Math.max((sw1 + 30), 64);
 			matrixStack.scale(f1, -f1, f1);
 			//dispatcher.getFontRenderer().drawString(label, -sw1 / 2F, 0, 0xFF000000 | chest.colors[ColorType.TEXT.index]);
-			dispatcher.getFontRenderer().draw(label, -sw1 / 2F, 0, 0xFF000000 | chest.colors[ColorType.TEXT.index], false, matrixStack.peek().getModel(), typeBuffer, false, 0, light1);
+			renderDispatcher.getFontRenderer().renderString(label, -sw1 / 2F, 0, 0xFF000000 | chest.colors[ColorType.TEXT.index], false, matrixStack.getLast().getPositionMatrix(), typeBuffer, false, 0, light1);
 			matrixStack.pop();
 
 			if (chest.textGlow && chest.hasWorld())

@@ -354,7 +354,7 @@ public class ColorSelectorScreen extends Screen
 		minecraft.getTextureManager().bindTexture(TEXTURE);
 		blit(x, y, 0, 0, xSize, ySize);
 
-		if (prevMouseX != mouseX && GLFW.glfwGetMouseButton(minecraft.getWindow().getHandle(), GLFW.GLFW_MOUSE_BUTTON_LEFT) == GLFW.GLFW_PRESS)
+		if (prevMouseX != mouseX && GLFW.glfwGetMouseButton(minecraft.getMainWindow().getHandle(), GLFW.GLFW_MOUSE_BUTTON_LEFT) == GLFW.GLFW_PRESS)
 		{
 			checkHSBMouse(mouseX, mouseY);
 		}
@@ -371,15 +371,15 @@ public class ColorSelectorScreen extends Screen
 		Tessellator tessellator = Tessellator.getInstance();
 		BufferBuilder bufferbuilder = tessellator.getBuffer();
 		bufferbuilder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
-		bufferbuilder.vertex(x + 10, y + 58, 0D).color(rgbMinS[0], rgbMinS[1], rgbMinS[2], 1F).endVertex();
-		bufferbuilder.vertex(x + 129, y + 58, 0D).color(rgbMaxS[0], rgbMaxS[1], rgbMaxS[2], 1F).endVertex();
-		bufferbuilder.vertex(x + 129, y + 47, 0D).color(rgbMaxS[0], rgbMaxS[1], rgbMaxS[2], 1F).endVertex();
-		bufferbuilder.vertex(x + 10, y + 47, 0D).color(rgbMinS[0], rgbMinS[1], rgbMinS[2], 1F).endVertex();
+		bufferbuilder.pos(x + 10, y + 58, 0D).color(rgbMinS[0], rgbMinS[1], rgbMinS[2], 1F).endVertex();
+		bufferbuilder.pos(x + 129, y + 58, 0D).color(rgbMaxS[0], rgbMaxS[1], rgbMaxS[2], 1F).endVertex();
+		bufferbuilder.pos(x + 129, y + 47, 0D).color(rgbMaxS[0], rgbMaxS[1], rgbMaxS[2], 1F).endVertex();
+		bufferbuilder.pos(x + 10, y + 47, 0D).color(rgbMinS[0], rgbMinS[1], rgbMinS[2], 1F).endVertex();
 
-		bufferbuilder.vertex(x + 10, y + 72, 0D).color(rgbMinB[0], rgbMinB[1], rgbMinB[2], 1F).endVertex();
-		bufferbuilder.vertex(x + 129, y + 72, 0D).color(rgbMaxB[0], rgbMaxB[1], rgbMaxB[2], 1F).endVertex();
-		bufferbuilder.vertex(x + 129, y + 61, 0D).color(rgbMaxB[0], rgbMaxB[1], rgbMaxB[2], 1F).endVertex();
-		bufferbuilder.vertex(x + 10, y + 61, 0D).color(rgbMinB[0], rgbMinB[1], rgbMinB[2], 1F).endVertex();
+		bufferbuilder.pos(x + 10, y + 72, 0D).color(rgbMinB[0], rgbMinB[1], rgbMinB[2], 1F).endVertex();
+		bufferbuilder.pos(x + 129, y + 72, 0D).color(rgbMaxB[0], rgbMaxB[1], rgbMaxB[2], 1F).endVertex();
+		bufferbuilder.pos(x + 129, y + 61, 0D).color(rgbMaxB[0], rgbMaxB[1], rgbMaxB[2], 1F).endVertex();
+		bufferbuilder.pos(x + 10, y + 61, 0D).color(rgbMinB[0], rgbMinB[1], rgbMinB[2], 1F).endVertex();
 		tessellator.draw();
 
 		RenderSystem.shadeModel(GL11.GL_FLAT);
@@ -399,7 +399,7 @@ public class ColorSelectorScreen extends Screen
 		String t = title.getFormattedText();
 		font.drawString(t, x + 9, y + 7, 4210752);
 
-		RenderHelper.enableGuiDepthLighting();
+		RenderHelper.enableStandardItemLighting();
 		RenderSystem.disableLighting();
 		RenderSystem.enableRescaleNormal();
 
@@ -424,6 +424,6 @@ public class ColorSelectorScreen extends Screen
 
 		RenderSystem.enableLighting();
 		RenderSystem.enableDepthTest();
-		RenderHelper.disableGuiDepthLighting();
+		RenderHelper.disableStandardItemLighting();
 	}
 }

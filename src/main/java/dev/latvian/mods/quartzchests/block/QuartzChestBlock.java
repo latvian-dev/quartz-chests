@@ -136,7 +136,7 @@ public class QuartzChestBlock extends HorizontalBlock
 
 	@Override
 	@Deprecated
-	public ActionResultType onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTraceResult)
+	public ActionResultType onBlockActivated(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTraceResult)
 	{
 		if (world.isRemote || player.isSpectator())
 		{

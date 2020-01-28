@@ -166,7 +166,7 @@ public class QuartzChestScreen extends ContainerScreen<QuartzChestContainer>
 
 		if (!container.chest.icon.isEmpty())
 		{
-			RenderHelper.enableGuiDepthLighting();
+			RenderHelper.disableStandardItemLighting();
 
 			RenderSystem.pushMatrix();
 			RenderSystem.translatef(guiLeft + 159F, guiTop + 6F, 16F);
@@ -189,8 +189,7 @@ public class QuartzChestScreen extends ContainerScreen<QuartzChestContainer>
 
 			RenderSystem.enableLighting();
 			RenderSystem.enableDepthTest();
-			RenderHelper.disableGuiDepthLighting();
-			//RenderHelper.enableStandardItemLighting();
+			RenderHelper.enableStandardItemLighting();
 		}
 	}
 

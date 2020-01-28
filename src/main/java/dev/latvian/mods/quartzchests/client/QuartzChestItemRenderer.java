@@ -24,6 +24,6 @@ public class QuartzChestItemRenderer extends ItemStackTileEntityRenderer
 		}
 
 		dummy.readVisualData(stack.hasTag() ? stack.getTag().getCompound("BlockEntityTag") : new CompoundNBT());
-		TileEntityRendererDispatcher.instance.renderEntity(dummy, matrixStack, renderTypeBuffer, light1, light2);
+		TileEntityRendererDispatcher.instance.renderNullable(dummy, matrixStack, renderTypeBuffer, light1, light2);
 	}
 }
