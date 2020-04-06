@@ -1,8 +1,8 @@
 package dev.latvian.mods.quartzchests.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import dev.latvian.mods.quartzchests.block.QuartzChestsBlocks;
 import dev.latvian.mods.quartzchests.block.entity.ColorType;
+import dev.latvian.mods.quartzchests.item.QuartzChestsItems;
 import dev.latvian.mods.quartzchests.net.QuartzChestsNet;
 import dev.latvian.mods.quartzchests.net.SetColorMessage;
 import dev.latvian.mods.quartzchests.net.SetIconMessage;
@@ -59,7 +59,7 @@ public class QuartzChestScreen extends ContainerScreen<QuartzChestContainer>
 		textColorButton = addColorButton(ColorType.TEXT, guiLeft + 144, guiTop + 4);
 
 		iconButton = addSmallButton(guiLeft + 157, guiTop + 4, b -> {
-			if (!minecraft.player.inventory.getItemStack().isEmpty() && minecraft.player.inventory.getItemStack().getItem() != QuartzChestsBlocks.CHEST.asItem())
+			if (!minecraft.player.inventory.getItemStack().isEmpty() && minecraft.player.inventory.getItemStack().getItem() != QuartzChestsItems.CHEST.get())
 			{
 				QuartzChestsNet.MAIN.sendToServer(new SetIconMessage(container.chest.getPos(), minecraft.player.inventory.getItemStack()));
 			}

@@ -20,7 +20,7 @@ public class QuartzChestContainer extends Container
 
 	public QuartzChestContainer(int id, PlayerInventory playerInventory, QuartzChestEntity c)
 	{
-		super(QuartzChestsContainers.CHEST, id);
+		super(QuartzChestsContainers.CHEST.get(), id);
 		chest = c;
 
 		for (int y = 0; y < 6; y++)

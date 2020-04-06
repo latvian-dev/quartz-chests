@@ -44,7 +44,7 @@ public class QuartzChestEntity extends TileEntity implements INameable, ITickabl
 
 	public QuartzChestEntity()
 	{
-		super(QuartzChestsBlockEntities.CHEST);
+		super(QuartzChestsBlockEntities.CHEST.get());
 		isDirty = sendUpdate = false;
 		label = "";
 		colors = new int[ColorType.VALUES.length];

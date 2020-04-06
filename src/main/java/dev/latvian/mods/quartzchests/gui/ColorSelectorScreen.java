@@ -49,7 +49,7 @@ public class ColorSelectorScreen extends Screen
 		ySize = 107;
 		parent = s;
 		type = t;
-		preview = new ItemStack(QuartzChestsBlocks.CHEST);
+		preview = new ItemStack(QuartzChestsBlocks.CHEST.get());
 		prevColor = s.getContainer().chest.colors[t.index];
 		rgb = new float[3];
 		hsb = new float[3];

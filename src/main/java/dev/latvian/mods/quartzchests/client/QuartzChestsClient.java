@@ -6,7 +6,6 @@ import dev.latvian.mods.quartzchests.gui.QuartzChestScreen;
 import dev.latvian.mods.quartzchests.gui.QuartzChestsContainers;
 import net.minecraft.client.gui.ScreenManager;
 import net.minecraft.client.renderer.texture.AtlasTexture;
-import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
@@ -27,8 +26,8 @@ public class QuartzChestsClient extends QuartzChestsCommon
 
 	private void setup(FMLClientSetupEvent event)
 	{
-		ClientRegistry.bindTileEntityRenderer(QuartzChestsBlockEntities.CHEST, QuartzChestRenderer::new);
-		ScreenManager.registerFactory(QuartzChestsContainers.CHEST, QuartzChestScreen::new);
+		ClientRegistry.bindTileEntityRenderer(QuartzChestsBlockEntities.CHEST.get(), QuartzChestRenderer::new);
+		ScreenManager.registerFactory(QuartzChestsContainers.CHEST.get(), QuartzChestScreen::new);
 	}
 
 	private void textureStitch(TextureStitchEvent.Pre event)
@@ -38,11 +37,5 @@ public class QuartzChestsClient extends QuartzChestsCommon
 			event.addSprite(new ResourceLocation("quartzchests:block/chest_base"));
 			event.addSprite(new ResourceLocation("quartzchests:block/chest_borders"));
 		}
-	}
-
-	@Override
-	public void setQuartzChestTESIR(Item.Properties properties)
-	{
-		properties.setISTER(() -> QuartzChestItemRenderer::new);
 	}
 }

@@ -173,7 +173,7 @@ public class QuartzChestBlock extends HorizontalBlock
 				world.markAndNotifyBlock(pos, null, state, state, Constants.BlockFlags.DEFAULT_AND_RERENDER);
 				return ActionResultType.SUCCESS;
 			}
-			else if (item == QuartzChestsItems.KEEP_INVENTORY_UPGRADE)
+			else if (item == QuartzChestsItems.KEEP_INVENTORY_UPGRADE.get())
 			{
 				if (!chest.keepInventory)
 				{
@@ -184,7 +184,7 @@ public class QuartzChestBlock extends HorizontalBlock
 
 				return ActionResultType.SUCCESS;
 			}
-			else if (item == QuartzChestsItems.GLOWING_TEXT_UPGRADE)
+			else if (item == QuartzChestsItems.GLOWING_TEXT_UPGRADE.get())
 			{
 				if (!chest.textGlow)
 				{
@@ -195,7 +195,7 @@ public class QuartzChestBlock extends HorizontalBlock
 
 				return ActionResultType.SUCCESS;
 			}
-			else if (item == QuartzChestsItems.BOLD_TEXT_UPGRADE)
+			else if (item == QuartzChestsItems.BOLD_TEXT_UPGRADE.get())
 			{
 				if (!chest.textBold)
 				{
@@ -206,7 +206,7 @@ public class QuartzChestBlock extends HorizontalBlock
 
 				return ActionResultType.SUCCESS;
 			}
-			else if (item == QuartzChestsItems.ITALIC_TEXT_UPGRADE)
+			else if (item == QuartzChestsItems.ITALIC_TEXT_UPGRADE.get())
 			{
 				if (!chest.textItalic)
 				{

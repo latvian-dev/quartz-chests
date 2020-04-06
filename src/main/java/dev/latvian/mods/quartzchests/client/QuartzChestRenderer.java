@@ -76,7 +76,7 @@ public class QuartzChestRenderer extends TileEntityRenderer<QuartzChestEntity>
 	public void render(QuartzChestEntity chest, float partialTicks, MatrixStack matrixStack, IRenderTypeBuffer typeBuffer, int light1, int light2)
 	{
 		World world = chest.getWorld();
-		BlockState blockstate = world != null ? chest.getBlockState() : QuartzChestsBlocks.CHEST.getDefaultState().with(HorizontalBlock.HORIZONTAL_FACING, Direction.SOUTH);
+		BlockState blockstate = world != null ? chest.getBlockState() : QuartzChestsBlocks.CHEST.get().getDefaultState().with(HorizontalBlock.HORIZONTAL_FACING, Direction.SOUTH);
 
 		matrixStack.push();
 		float f = blockstate.get(HorizontalBlock.HORIZONTAL_FACING).getHorizontalAngle();
