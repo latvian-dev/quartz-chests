@@ -16,7 +16,7 @@ public class QuartzChestItemRenderer extends ItemStackTileEntityRenderer
 	private QuartzChestEntity dummy;
 
 	@Override
-	public void render(ItemStack stack, MatrixStack matrixStack, IRenderTypeBuffer renderTypeBuffer, int light1, int light2)
+	public void render(ItemStack stack, MatrixStack matrixStack, IRenderTypeBuffer renderTypeBuffer, int combinedLight, int combinedOverlay)
 	{
 		if (dummy == null)
 		{
@@ -24,6 +24,6 @@ public class QuartzChestItemRenderer extends ItemStackTileEntityRenderer
 		}
 
 		dummy.readVisualData(stack.hasTag() ? stack.getTag().getCompound("BlockEntityTag") : new CompoundNBT());
-		TileEntityRendererDispatcher.instance.renderNullable(dummy, matrixStack, renderTypeBuffer, light1, light2);
+		TileEntityRendererDispatcher.instance.renderNullable(dummy, matrixStack, renderTypeBuffer, combinedLight, combinedOverlay);
 	}
 }

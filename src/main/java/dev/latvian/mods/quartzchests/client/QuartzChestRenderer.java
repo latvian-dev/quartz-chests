@@ -7,9 +7,7 @@ import com.mojang.blaze3d.vertex.IVertexBuilder;
 import dev.latvian.mods.quartzchests.block.QuartzChestsBlocks;
 import dev.latvian.mods.quartzchests.block.entity.ColorType;
 import dev.latvian.mods.quartzchests.block.entity.QuartzChestEntity;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.block.HorizontalBlock;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
@@ -73,7 +71,7 @@ public class QuartzChestRenderer extends TileEntityRenderer<QuartzChestEntity>
 	}
 
 	@Override
-	public void render(QuartzChestEntity chest, float partialTicks, MatrixStack matrixStack, IRenderTypeBuffer typeBuffer, int light1, int light2)
+	public void render(QuartzChestEntity chest, float partialTicks, MatrixStack matrixStack, IRenderTypeBuffer typeBuffer, int combinedLight, int combinedOverlay)
 	{
 		World world = chest.getWorld();
 		BlockState blockstate = world != null ? chest.getBlockState() : QuartzChestsBlocks.CHEST.get().getDefaultState().with(HorizontalBlock.HORIZONTAL_FACING, Direction.SOUTH);
@@ -102,34 +100,20 @@ public class QuartzChestRenderer extends TileEntityRenderer<QuartzChestEntity>
 		int baseR = (chest.colors[ColorType.CHEST.index] >> 16) & 255;
 		int baseG = (chest.colors[ColorType.CHEST.index] >> 8) & 255;
 		int baseB = (chest.colors[ColorType.CHEST.index] >> 0) & 255;
-		baseModel.render(matrixStack, builderBase, light1, light2, baseR / 255F, baseG / 255F, baseB / 255F, 1F);
+		baseModel.render(matrixStack, builderBase, combinedLight, combinedOverlay, baseR / 255F, baseG / 255F, baseB / 255F, 1F);
 
 		int borderR = (chest.colors[ColorType.BORDER.index] >> 16) & 255;
 		int borderG = (chest.colors[ColorType.BORDER.index] >> 8) & 255;
 		int borderB = (chest.colors[ColorType.BORDER.index] >> 0) & 255;
-		bordersModel.render(matrixStack, builderBorders, light1, light2, borderR / 255F, borderG / 255F, borderB / 255F, 1F);
+		bordersModel.render(matrixStack, builderBorders, combinedLight, combinedOverlay, borderR / 255F, borderG / 255F, borderB / 255F, 1F);
 
 		if (!chest.icon.isEmpty())
 		{
 			matrixStack.push();
-			Block b = Block.getBlockFromItem(chest.icon.getItem());
-
-			if (b == Blocks.AIR)
-			{
-				matrixStack.translate(0.5F, 0.33F, 0.96F);
-				matrixStack.rotate(Vector3f.YP.rotationDegrees(180F));
-				float iS = 0.4F;
-				matrixStack.scale(iS, iS, iS);
-			}
-			else
-			{
-				matrixStack.translate(0.5F, 0.33F, 0.88F);
-				matrixStack.rotate(Vector3f.YP.rotationDegrees(180F));
-				float iS = 0.7F;
-				matrixStack.scale(iS, iS, iS);
-			}
-
-			Minecraft.getInstance().getItemRenderer().renderItem(chest.icon, ItemCameraTransforms.TransformType.FIXED, light1, OverlayTexture.DEFAULT_LIGHT, matrixStack, typeBuffer);
+			matrixStack.translate(0.5F, 0.33F, 0.96F);
+			matrixStack.rotate(Vector3f.YP.rotationDegrees(180F));
+			matrixStack.scale(0.4F, 0.4F, 0.4F);
+			Minecraft.getInstance().getItemRenderer().renderItem(chest.icon, ItemCameraTransforms.TransformType.FIXED, combinedLight, OverlayTexture.DEFAULT_LIGHT, matrixStack, typeBuffer);
 			matrixStack.pop();
 		}
 
@@ -165,7 +149,7 @@ public class QuartzChestRenderer extends TileEntityRenderer<QuartzChestEntity>
 			float f1 = 1F / (float) Math.max((sw1 + 30), 64);
 			matrixStack.scale(f1, -f1, f1);
 			//dispatcher.getFontRenderer().drawString(label, -sw1 / 2F, 0, 0xFF000000 | chest.colors[ColorType.TEXT.index]);
-			renderDispatcher.getFontRenderer().renderString(label, -sw1 / 2F, 0, 0xFF000000 | chest.colors[ColorType.TEXT.index], false, matrixStack.getLast().getPositionMatrix(), typeBuffer, false, 0, light1);
+			renderDispatcher.getFontRenderer().renderString(label, -sw1 / 2F, 0, 0xFF000000 | chest.colors[ColorType.TEXT.index], false, matrixStack.getLast().getPositionMatrix(), typeBuffer, false, 0, combinedLight);
 			matrixStack.pop();
 
 			if (chest.textGlow && chest.hasWorld())
