@@ -82,13 +82,6 @@ jar {
 	}
 }
 
-task deobfJar(type: Jar) {
-	from sourceSets.main.output
-	classifier 'dev'
-}
-
-build.dependsOn deobfJar
-
 def reobfFile = file("$buildDir/reobfJar/output.jar")
 def reobfArtifact = artifacts.add('default', reobfFile) {
 	type 'jar'
