@@ -13,7 +13,7 @@ import net.minecraftforge.registries.ForgeRegistries;
  */
 public class QuartzChestsBlocks
 {
-	public static final DeferredRegister<Block> BLOCKS = new DeferredRegister<>(ForgeRegistries.BLOCKS, "quartzchests");
+	public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, "quartzchests");
 
 	public static final RegistryObject<Block> CHEST = BLOCKS.register("chest", () -> new QuartzChestBlock(Block.Properties.create(Material.WOOD, MaterialColor.QUARTZ).hardnessAndResistance(2F).sound(SoundType.WOOD)));
 }

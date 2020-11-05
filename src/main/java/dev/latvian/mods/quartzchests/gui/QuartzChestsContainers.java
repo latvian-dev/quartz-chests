@@ -11,7 +11,7 @@ import net.minecraftforge.registries.ForgeRegistries;
  */
 public class QuartzChestsContainers
 {
-	public static final DeferredRegister<ContainerType<?>> CONTAINERS = new DeferredRegister<>(ForgeRegistries.CONTAINERS, "quartzchests");
+	public static final DeferredRegister<ContainerType<?>> CONTAINERS = DeferredRegister.create(ForgeRegistries.CONTAINERS, "quartzchests");
 
 	public static final RegistryObject<ContainerType<QuartzChestContainer>> CHEST = CONTAINERS.register("chest", () -> new ContainerType<>((IContainerFactory<QuartzChestContainer>) QuartzChestContainer::new));
 }

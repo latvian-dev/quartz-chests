@@ -1,5 +1,6 @@
 package dev.latvian.mods.quartzchests.gui;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.latvian.mods.quartzchests.block.entity.ColorType;
 import dev.latvian.mods.quartzchests.item.QuartzChestsItems;
@@ -12,15 +13,14 @@ import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.DyeItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import org.lwjgl.glfw.GLFW;
-
-import java.util.Collections;
 
 /**
  * @author LatvianModder
@@ -44,7 +44,7 @@ public class QuartzChestScreen extends ContainerScreen<QuartzChestContainer>
 	{
 		super.init();
 		minecraft.keyboardListener.enableRepeatEvents(true);
-		labelField = new TextFieldWidget(font, guiLeft + 9, guiTop + 6, 69, 9, I18n.format("block.quartzchests.chest.label"));
+		labelField = new TextFieldWidget(font, guiLeft + 9, guiTop + 6, 69, 9, new TranslationTextComponent("block.quartzchests.chest.label"));
 		labelField.setText(container.chest.label);
 		labelField.setCanLoseFocus(true);
 		labelField.setTextColor(-1);
@@ -72,10 +72,10 @@ public class QuartzChestScreen extends ContainerScreen<QuartzChestContainer>
 
 	public Button addSmallButton(int x, int y, Button.IPressable click)
 	{
-		return addButton(new Button(x, y, 12, 12, "", click)
+		return addButton(new Button(x, y, 12, 12, StringTextComponent.EMPTY, click)
 		{
 			@Override
-			public void renderButton(int mouseX, int mouseY, float partialTicks)
+			public void renderButton(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks)
 			{
 			}
 		});
@@ -110,9 +110,8 @@ public class QuartzChestScreen extends ContainerScreen<QuartzChestContainer>
 	}
 
 	@Override
-	public void removed()
+	public void onClose()
 	{
-		super.removed();
 		minecraft.keyboardListener.enableRepeatEvents(false);
 	}
 
@@ -136,32 +135,32 @@ public class QuartzChestScreen extends ContainerScreen<QuartzChestContainer>
 	}
 
 	@Override
-	public void render(int mouseX, int mouseY, float partialTicks)
+	public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks)
 	{
-		renderBackground();
-		super.render(mouseX, mouseY, partialTicks);
-		renderHoveredToolTip(mouseX, mouseY);
+		renderBackground(matrixStack);
+		super.render(matrixStack, mouseX, mouseY, partialTicks);
+		renderHoveredTooltip(matrixStack, mouseX, mouseY);
 		RenderSystem.disableLighting();
-		labelField.render(mouseX, mouseY, partialTicks);
+		labelField.render(matrixStack, mouseX, mouseY, partialTicks);
 
 		if (chestColorButton.isHovered())
 		{
-			renderTooltip(Collections.singletonList(I18n.format("block.quartzchests.chest.chest_color")), mouseX, mouseY);
+			renderTooltip(matrixStack, new TranslationTextComponent("block.quartzchests.chest.chest_color"), mouseX, mouseY);
 		}
 
 		if (borderColorButton.isHovered())
 		{
-			renderTooltip(Collections.singletonList(I18n.format("block.quartzchests.chest.border_color")), mouseX, mouseY);
+			renderTooltip(matrixStack, new TranslationTextComponent("block.quartzchests.chest.border_color"), mouseX, mouseY);
 		}
 
 		if (textColorButton.isHovered())
 		{
-			renderTooltip(Collections.singletonList(I18n.format("block.quartzchests.chest.text_color")), mouseX, mouseY);
+			renderTooltip(matrixStack, new TranslationTextComponent("block.quartzchests.chest.text_color"), mouseX, mouseY);
 		}
 
 		if (iconButton.isHovered())
 		{
-			renderTooltip(Collections.singletonList(I18n.format("block.quartzchests.chest.icon")), mouseX, mouseY);
+			renderTooltip(matrixStack, new TranslationTextComponent("block.quartzchests.chest.icon"), mouseX, mouseY);
 		}
 
 		if (!container.chest.icon.isEmpty())
@@ -194,23 +193,23 @@ public class QuartzChestScreen extends ContainerScreen<QuartzChestContainer>
 	}
 
 	@Override
-	protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY)
+	protected void drawGuiContainerForegroundLayer(MatrixStack matrixStack, int mouseX, int mouseY)
 	{
-		font.drawString(playerInventory.getDisplayName().getFormattedText(), 8F, ySize - 94, 4210752);
+		font.func_243248_b(matrixStack, playerInventory.getDisplayName(), 8F, ySize - 94, 4210752);
 	}
 
 	@Override
-	protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY)
+	protected void drawGuiContainerBackgroundLayer(MatrixStack matrixStack, float partialTicks, int mouseX, int mouseY)
 	{
 		RenderSystem.color4f(1F, 1F, 1F, 1F);
 		minecraft.getTextureManager().bindTexture(TEXTURE);
-		blit(guiLeft, guiTop, 0, 0, xSize, ySize);
+		blit(matrixStack, guiLeft, guiTop, 0, 0, xSize, ySize);
 
 		for (int i = 0; i < ColorType.VALUES.length; i++)
 		{
 			int c = container.chest.colors[i];
 			RenderSystem.color4f(((c >> 16) & 255) / 255F, ((c >> 8) & 255) / 255F, (c & 255) / 255F, 1F);
-			blit(guiLeft + 118 + i * 13, guiTop + 4, 177, 0, 12, 12);
+			blit(matrixStack, guiLeft + 118 + i * 13, guiTop + 4, 177, 0, 12, 12);
 		}
 
 		RenderSystem.color4f(1F, 1F, 1F, 1F);

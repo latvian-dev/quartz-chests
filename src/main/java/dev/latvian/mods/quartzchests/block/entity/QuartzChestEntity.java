@@ -1,5 +1,6 @@
 package dev.latvian.mods.quartzchests.block.entity;
 
+import net.minecraft.block.BlockState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
@@ -167,9 +168,9 @@ public class QuartzChestEntity extends TileEntity implements INameable, ITickabl
 	}
 
 	@Override
-	public void read(CompoundNBT nbt)
+	public void read(BlockState state, CompoundNBT nbt)
 	{
-		super.read(nbt);
+		super.read(state, nbt);
 		readData(nbt);
 	}
 
@@ -200,9 +201,9 @@ public class QuartzChestEntity extends TileEntity implements INameable, ITickabl
 	}
 
 	@Override
-	public void handleUpdateTag(CompoundNBT nbt)
+	public void handleUpdateTag(BlockState state, CompoundNBT nbt)
 	{
-		read(nbt);
+		read(state, nbt);
 	}
 
 	@Override
@@ -309,7 +310,8 @@ public class QuartzChestEntity extends TileEntity implements INameable, ITickabl
 		if (sendUpdate && world != null)
 		{
 			sendUpdate = false;
-			world.markAndNotifyBlock(pos, null, getBlockState(), getBlockState(), Constants.BlockFlags.DEFAULT);
+			BlockState state = getBlockState();
+			world.markAndNotifyBlock(pos, world.getChunkAt(pos), state, state, Constants.BlockFlags.DEFAULT, 512);
 		}
 	}
 }

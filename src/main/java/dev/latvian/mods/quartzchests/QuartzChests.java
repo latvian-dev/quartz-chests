@@ -19,8 +19,7 @@ public class QuartzChests
 	public QuartzChests()
 	{
 		instance = this;
-		//noinspection Convert2MethodRef
-		proxy = DistExecutor.runForDist(() -> () -> new QuartzChestsClient(), () -> () -> new QuartzChestsCommon());
+		proxy = DistExecutor.safeRunForDist(() -> QuartzChestsClient::new, () -> QuartzChestsCommon::new);
 		QuartzChestsBlocks.BLOCKS.register(FMLJavaModLoadingContext.get().getModEventBus());
 		QuartzChestsItems.ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
 		QuartzChestsBlockEntities.BLOCK_ENTITIES.register(FMLJavaModLoadingContext.get().getModEventBus());

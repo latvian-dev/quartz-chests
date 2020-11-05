@@ -15,7 +15,7 @@ import net.minecraftforge.registries.ForgeRegistries;
  */
 public class QuartzChestsItems
 {
-	public static final DeferredRegister<Item> ITEMS = new DeferredRegister<>(ForgeRegistries.ITEMS, "quartzchests");
+	public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, "quartzchests");
 	public static final ItemGroup ITEM_GROUP = new ItemGroup("quartzchests")
 	{
 		@Override

@@ -1,12 +1,13 @@
-modLoader="javafml"
-loaderVersion="[28,)"
-issueTrackerURL="https://github.com/LatvianModder/Quartz-Chests/issues"
+modLoader = "javafml"
+loaderVersion = "[28,)"
+issueTrackerURL = "https://github.com/LatvianModder/Quartz-Chests/issues"
+license = "GNU LGPLv3"
 
 [[mods]]
-modId="quartzchests"
-version="${file.jarVersion}"
-displayName="Quartz Chests"
-authors="LatvianModder"
-description='''
+modId = "quartzchests"
+version = "${file.jarVersion}"
+displayName = "Quartz Chests"
+authors = "LatvianModder"
+description = '''
 Adds portable chests with decoration options
 '''

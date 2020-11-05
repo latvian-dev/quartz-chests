@@ -12,11 +12,10 @@ import net.minecraft.block.HorizontalBlock;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.Vector3f;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
-import net.minecraft.client.renderer.model.Material;
 import net.minecraft.client.renderer.model.Model;
 import net.minecraft.client.renderer.model.ModelRenderer;
+import net.minecraft.client.renderer.model.RenderMaterial;
 import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
@@ -24,6 +23,7 @@ import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 
@@ -38,7 +38,7 @@ public class QuartzChestRenderer extends TileEntityRenderer<QuartzChestEntity>
 
 		public QuartzChestModel()
 		{
-			super(RenderType::entityCutout);
+			super(RenderType::getEntityCutout);
 			textureWidth = 64;
 			textureHeight = 64;
 			bottom = new ModelRenderer(this, 0, 19);
@@ -58,8 +58,8 @@ public class QuartzChestRenderer extends TileEntityRenderer<QuartzChestEntity>
 		}
 	}
 
-	private static final Material TEXTURE_BASE = new Material(AtlasTexture.LOCATION_BLOCKS_TEXTURE, new ResourceLocation("quartzchests:block/chest_base"));
-	private static final Material TEXTURE_BORDERS = new Material(AtlasTexture.LOCATION_BLOCKS_TEXTURE, new ResourceLocation("quartzchests:block/chest_borders"));
+	private static final RenderMaterial TEXTURE_BASE = new RenderMaterial(AtlasTexture.LOCATION_BLOCKS_TEXTURE, new ResourceLocation("quartzchests:block/chest_base"));
+	private static final RenderMaterial TEXTURE_BORDERS = new RenderMaterial(AtlasTexture.LOCATION_BLOCKS_TEXTURE, new ResourceLocation("quartzchests:block/chest_borders"));
 
 	private final QuartzChestModel baseModel, bordersModel;
 
@@ -94,8 +94,8 @@ public class QuartzChestRenderer extends TileEntityRenderer<QuartzChestEntity>
 			baseModel.top.rotateAngleX = bordersModel.top.rotateAngleX = 0F;
 		}
 
-		IVertexBuilder builderBase = TEXTURE_BASE.getBuffer(typeBuffer, RenderType::entityCutout);
-		IVertexBuilder builderBorders = TEXTURE_BORDERS.getBuffer(typeBuffer, RenderType::entityCutout);
+		IVertexBuilder builderBase = TEXTURE_BASE.getBuffer(typeBuffer, RenderType::getEntityCutout);
+		IVertexBuilder builderBorders = TEXTURE_BORDERS.getBuffer(typeBuffer, RenderType::getEntityCutout);
 
 		int baseR = (chest.colors[ColorType.CHEST.index] >> 16) & 255;
 		int baseG = (chest.colors[ColorType.CHEST.index] >> 8) & 255;
@@ -113,7 +113,7 @@ public class QuartzChestRenderer extends TileEntityRenderer<QuartzChestEntity>
 			matrixStack.translate(0.5F, 0.33F, 0.96F);
 			matrixStack.rotate(Vector3f.YP.rotationDegrees(180F));
 			matrixStack.scale(0.4F, 0.4F, 0.4F);
-			Minecraft.getInstance().getItemRenderer().renderItem(chest.icon, ItemCameraTransforms.TransformType.FIXED, combinedLight, OverlayTexture.DEFAULT_LIGHT, matrixStack, typeBuffer);
+			Minecraft.getInstance().getItemRenderer().renderItem(chest.icon, ItemCameraTransforms.TransformType.FIXED, combinedLight, OverlayTexture.NO_OVERLAY, matrixStack, typeBuffer);
 			matrixStack.pop();
 		}
 
@@ -149,7 +149,7 @@ public class QuartzChestRenderer extends TileEntityRenderer<QuartzChestEntity>
 			float f1 = 1F / (float) Math.max((sw1 + 30), 64);
 			matrixStack.scale(f1, -f1, f1);
 			//dispatcher.getFontRenderer().drawString(label, -sw1 / 2F, 0, 0xFF000000 | chest.colors[ColorType.TEXT.index]);
-			renderDispatcher.getFontRenderer().renderString(label, -sw1 / 2F, 0, 0xFF000000 | chest.colors[ColorType.TEXT.index], false, matrixStack.getLast().getPositionMatrix(), typeBuffer, false, 0, combinedLight);
+			renderDispatcher.getFontRenderer().renderString(label, -sw1 / 2F, 0, 0xFF000000 | chest.colors[ColorType.TEXT.index], false, matrixStack.getLast().getMatrix(), typeBuffer, false, 0, combinedLight);
 			matrixStack.pop();
 
 			if (chest.textGlow && chest.hasWorld())

@@ -11,7 +11,7 @@ import net.minecraftforge.registries.ForgeRegistries;
  */
 public class QuartzChestsBlockEntities
 {
-	public static final DeferredRegister<TileEntityType<?>> BLOCK_ENTITIES = new DeferredRegister<>(ForgeRegistries.TILE_ENTITIES, "quartzchests");
+	public static final DeferredRegister<TileEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(ForgeRegistries.TILE_ENTITIES, "quartzchests");
 
 	public static final RegistryObject<TileEntityType<QuartzChestEntity>> CHEST = BLOCK_ENTITIES.register("chest", () -> TileEntityType.Builder.create(QuartzChestEntity::new, QuartzChestsBlocks.CHEST.get()).build(null));
 }

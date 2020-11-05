@@ -32,7 +32,7 @@ public class QuartzChestsClient extends QuartzChestsCommon
 
 	private void textureStitch(TextureStitchEvent.Pre event)
 	{
-		if (event.getMap().getBasePath().equals(AtlasTexture.LOCATION_BLOCKS_TEXTURE))
+		if (event.getMap().getTextureLocation().equals(AtlasTexture.LOCATION_BLOCKS_TEXTURE))
 		{
 			event.addSprite(new ResourceLocation("quartzchests:block/chest_base"));
 			event.addSprite(new ResourceLocation("quartzchests:block/chest_borders"));

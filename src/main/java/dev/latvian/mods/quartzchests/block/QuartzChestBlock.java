@@ -13,8 +13,8 @@ import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
-import net.minecraft.fluid.IFluidState;
 import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.INamedContainerProvider;
@@ -23,6 +23,8 @@ import net.minecraft.item.DyeItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.NameTagItem;
+import net.minecraft.loot.LootContext;
+import net.minecraft.loot.LootParameters;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.pathfinding.PathType;
 import net.minecraft.state.StateContainer;
@@ -43,8 +45,6 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
-import net.minecraft.world.storage.loot.LootContext;
-import net.minecraft.world.storage.loot.LootParameters;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.ToolType;
@@ -85,13 +85,13 @@ public class QuartzChestBlock extends HorizontalBlock
 	@Override
 	public BlockState getStateForPlacement(BlockItemUseContext context)
 	{
-		IFluidState ifluidstate = context.getWorld().getFluidState(context.getPos());
+		FluidState ifluidstate = context.getWorld().getFluidState(context.getPos());
 		return getDefaultState().with(HORIZONTAL_FACING, context.getPlacementHorizontalFacing().getOpposite()).with(BlockStateProperties.WATERLOGGED, ifluidstate.getFluid() == Fluids.WATER);
 	}
 
 	@Override
 	@Deprecated
-	public IFluidState getFluidState(BlockState state)
+	public FluidState getFluidState(BlockState state)
 	{
 		return state.get(BlockStateProperties.WATERLOGGED) ? Fluids.WATER.getStillFluidState(false) : super.getFluidState(state);
 	}
@@ -155,7 +155,7 @@ public class QuartzChestBlock extends HorizontalBlock
 			{
 				chest.label = stack.getDisplayName().getString();
 				chest.markDirty();
-				world.markAndNotifyBlock(pos, null, state, state, Constants.BlockFlags.DEFAULT_AND_RERENDER);
+				world.markAndNotifyBlock(pos, world.getChunkAt(pos), state, state, Constants.BlockFlags.DEFAULT_AND_RERENDER, 512);
 				return ActionResultType.SUCCESS;
 			}
 			else if (item instanceof DyeItem)
@@ -170,7 +170,7 @@ public class QuartzChestBlock extends HorizontalBlock
 				}
 
 				chest.markDirty();
-				world.markAndNotifyBlock(pos, null, state, state, Constants.BlockFlags.DEFAULT_AND_RERENDER);
+				world.markAndNotifyBlock(pos, world.getChunkAt(pos), state, state, Constants.BlockFlags.DEFAULT_AND_RERENDER, 512);
 				return ActionResultType.SUCCESS;
 			}
 			else if (item == QuartzChestsItems.KEEP_INVENTORY_UPGRADE.get())
@@ -336,42 +336,42 @@ public class QuartzChestBlock extends HorizontalBlock
 		CompoundNBT data = stack.getChildTag("BlockEntityTag");
 		dummy.readData(data == null ? new CompoundNBT() : data);
 
-		tooltip.add(new StringTextComponent("").appendSibling(new TranslationTextComponent("block.quartzchests.chest.label").applyTextStyle(TextFormatting.GRAY).appendText(": ")).appendSibling(dummy.getDisplayName().applyTextStyle(TextFormatting.YELLOW)));
+		tooltip.add(new StringTextComponent("").append(new TranslationTextComponent("block.quartzchests.chest.label").mergeStyle(TextFormatting.GRAY).appendString(": ")).append(new StringTextComponent("").append(dummy.getDisplayName()).mergeStyle(TextFormatting.YELLOW)));
 
 		for (ColorType type : ColorType.VALUES)
 		{
-			tooltip.add(new StringTextComponent("").appendSibling(new TranslationTextComponent(type.translationKey).applyTextStyle(TextFormatting.GRAY).appendText(": ")).appendSibling(new StringTextComponent(String.format("#%06X", dummy.colors[type.index])).applyTextStyle(TextFormatting.YELLOW)));
+			tooltip.add(new StringTextComponent("").append(new TranslationTextComponent(type.translationKey).mergeStyle(TextFormatting.GRAY).appendString(": ")).append(new StringTextComponent(String.format("#%06X", dummy.colors[type.index])).mergeStyle(TextFormatting.YELLOW)));
 		}
 
-		tooltip.add(new StringTextComponent("").appendSibling(new TranslationTextComponent("block.quartzchests.chest.icon").applyTextStyle(TextFormatting.GRAY).appendText(": ")).appendSibling(dummy.icon.getDisplayName().deepCopy().applyTextStyle(TextFormatting.YELLOW)));
+		tooltip.add(new StringTextComponent("").append(new TranslationTextComponent("block.quartzchests.chest.icon").mergeStyle(TextFormatting.GRAY).appendString(": ")).append(dummy.icon.getDisplayName().deepCopy().mergeStyle(TextFormatting.YELLOW)));
 
 		if (dummy.keepInventory && data != null)
 		{
-			tooltip.add(new StringTextComponent("").appendSibling(new TranslationTextComponent("block.quartzchests.chest.slots_used", data.getList("items", Constants.NBT.TAG_COMPOUND).size(), 54).applyTextStyle(TextFormatting.DARK_GRAY)));
+			tooltip.add(new StringTextComponent("").append(new TranslationTextComponent("block.quartzchests.chest.slots_used", data.getList("items", Constants.NBT.TAG_COMPOUND).size(), 54).mergeStyle(TextFormatting.DARK_GRAY)));
 		}
 
 		if (dummy.keepInventory || dummy.textGlow || dummy.textBold || dummy.textItalic)
 		{
-			tooltip.add(new TranslationTextComponent("block.quartzchests.chest.upgrades").applyTextStyle(TextFormatting.AQUA));
+			tooltip.add(new TranslationTextComponent("block.quartzchests.chest.upgrades").mergeStyle(TextFormatting.AQUA));
 
 			if (dummy.keepInventory)
 			{
-				tooltip.add(new StringTextComponent("+ ").applyTextStyle(TextFormatting.GREEN).appendSibling(new TranslationTextComponent("item.quartzchests.keep_inventory_upgrade")));
+				tooltip.add(new StringTextComponent("+ ").mergeStyle(TextFormatting.GREEN).append(new TranslationTextComponent("item.quartzchests.keep_inventory_upgrade")));
 			}
 
 			if (dummy.textGlow)
 			{
-				tooltip.add(new StringTextComponent("+ ").applyTextStyle(TextFormatting.GREEN).appendSibling(new TranslationTextComponent("item.quartzchests.glowing_text_upgrade")));
+				tooltip.add(new StringTextComponent("+ ").mergeStyle(TextFormatting.GREEN).append(new TranslationTextComponent("item.quartzchests.glowing_text_upgrade")));
 			}
 
 			if (dummy.textBold)
 			{
-				tooltip.add(new StringTextComponent("+ ").applyTextStyle(TextFormatting.GREEN).appendSibling(new TranslationTextComponent("item.quartzchests.bold_text_upgrade")));
+				tooltip.add(new StringTextComponent("+ ").mergeStyle(TextFormatting.GREEN).append(new TranslationTextComponent("item.quartzchests.bold_text_upgrade")));
 			}
 
 			if (dummy.textItalic)
 			{
-				tooltip.add(new StringTextComponent("+ ").applyTextStyle(TextFormatting.GREEN).appendSibling(new TranslationTextComponent("item.quartzchests.italic_text_upgrade")));
+				tooltip.add(new StringTextComponent("+ ").mergeStyle(TextFormatting.GREEN).append(new TranslationTextComponent("item.quartzchests.italic_text_upgrade")));
 			}
 		}
 	}
