@@ -1,11 +1,13 @@
 package dev.latvian.mods.quartzchests.item;
 
+import dev.latvian.mods.quartzchests.QuartzChests;
 import dev.latvian.mods.quartzchests.block.QuartzChestsBlocks;
-import dev.latvian.mods.quartzchests.client.QuartzChestItemRenderer;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -19,6 +21,7 @@ public class QuartzChestsItems
 	public static final ItemGroup ITEM_GROUP = new ItemGroup("quartzchests")
 	{
 		@Override
+		@OnlyIn(Dist.CLIENT)
 		public ItemStack createIcon()
 		{
 			return new ItemStack(CHEST.get());
@@ -27,8 +30,7 @@ public class QuartzChestsItems
 
 	public static final RegistryObject<Item> CHEST = ITEMS.register("chest", () -> {
 		Item.Properties properties = new Item.Properties().group(ITEM_GROUP).maxStackSize(16);
-		//noinspection Convert2MethodRef
-		properties.setISTER(() -> () -> new QuartzChestItemRenderer());
+		QuartzChests.proxy.setISTER(properties);
 		return new BlockItem(QuartzChestsBlocks.CHEST.get(), properties);
 	});
 

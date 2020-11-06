@@ -14,7 +14,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 public class QuartzChests
 {
 	public static QuartzChests instance;
-	public final QuartzChestsCommon proxy;
+	public static QuartzChestsCommon proxy;
 
 	public QuartzChests()
 	{

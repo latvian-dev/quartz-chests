@@ -6,6 +6,7 @@ import dev.latvian.mods.quartzchests.gui.QuartzChestScreen;
 import dev.latvian.mods.quartzchests.gui.QuartzChestsContainers;
 import net.minecraft.client.gui.ScreenManager;
 import net.minecraft.client.renderer.texture.AtlasTexture;
+import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
@@ -22,6 +23,12 @@ public class QuartzChestsClient extends QuartzChestsCommon
 	{
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::textureStitch);
+	}
+
+	@Override
+	public void setISTER(Item.Properties properties)
+	{
+		properties.setISTER(() -> QuartzChestItemRenderer::new);
 	}
 
 	private void setup(FMLClientSetupEvent event)
